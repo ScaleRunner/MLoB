@@ -58,6 +58,10 @@ for value in ['train', 'test']:
         replacement_word = '<UNK>'
         features, features_numeric_dict = get_features(data, top_perc, replacement_word)
 
+        # Save features as csv file.
+        df_features = pd.from_dict(features_numeric_dict)
+        df_features.to_csv('./features.csv', encoding='utf-8')
+
     # Filter comments, then process to numeric values.
     data['comment_vect_filtered'] = data['comment_vect_filtered'].apply(lambda x:
                                                                         [replacement_word if i not in features else i
@@ -67,4 +71,6 @@ for value in ['train', 'test']:
                                                                        [features_numeric_dict[i]
                                                                         for i in x]) # replace words with numeric values.
 
+
+    # Save data
     data.to_csv('./processed_{}_data.csv'.format(value), encoding='utf-8')
