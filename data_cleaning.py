@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # Text libs
 import re
@@ -8,61 +9,62 @@ from nltk.tokenize import TweetTokenizer
 #from gensim.models import word2vec
 from collections import Counter
 
-import language_check
+def get_features(data, top_perc, replacement_word):
+    features = []
+    for cat in ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']:
+        subset = data[data[cat] == 1]
+        cnt_words = Counter([x for l in subset['comment_vect_filtered'].values for x in l])
+        most_common_words = cnt_words.most_common(int(len(cnt_words.keys()) * top_perc))
+        features.extend([x[0] for x in most_common_words])
 
-# Load data
-train_data = pd.read_csv('./data/train.csv', encoding='utf-8')
-test_data = pd.read_csv('./data/test.csv', encoding='utf-8')
+    # Convert to set to get unique values, then back to list to support indexing.
+    features = list(set(features))
 
-# step 1: Remove NA values.
+    # Replace the remaining words in the sentences with '<UNK>'
+    # Replace the words in the sentences with a numeric value.
+    features.append(replacement_word)
 
-# Step 2: Remove stopwords (custom list)
-stopwords = ['the', 'a', 'an', ',']
+    features_numeric_dict = {features[x]: x for x in range(len(features))}  # Create dictionairy from unique words
 
+    return features, features_numeric_dict
 
-# Step 2: words to list
-# Might be interesting to test with and without stopwords
-tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
-train_data['comment_vect'] = train_data['comment_text'].apply(lambda x: tokenizer.tokenize(x))
-#test_data['comment_vect'] = test_data['comment_text'].apply(lambda x: tokenizer.tokenize(x))
+for value in ['train', 'test']:
 
-''''
-This is for LSTM
-'''
+    # Load data
+    data = pd.read_csv('./data/train.csv', encoding='utf-8').head(100)
 
-# Filter out stop words
-stop = stopwords.words('english')
-train_data['comment_vect_filtered'] = train_data['comment_vect'].apply(lambda x: [i for i in x if i not in stop])
+    # step 1: Remove NA values.
+    data = data.dropna()
 
-# Count all words
-#unique_words = Counter([x for l in train_data['comment_vect'].values.tolist() for x in l])# All unique words
+    # TODO: Remove stopwords (custom list)
+    cust_stopwords = ['the', 'a', 'an', ',']
 
-top_words = []
+    # Step 2: words to list
+    tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
+    data['comment_vect'] = data['comment_text'].apply(lambda x: tokenizer.tokenize(x))
 
-toxic_set = train_data[train_data['toxic'] == 1]
-unique_words_toxic = Counter([x for l in train_data['comment_vect_filtered'].values.tolist() for x in l])
+    ''''
+    LSTM
+    '''
 
+    # Filter out stop words
+    stop = stopwords.words('english')
+    data['comment_vect_filtered'] = data['comment_vect'].apply(lambda x: [i for i in x if i not in stop])
 
+    # If training, get features
+    if value == 'train':
+        # For each category select the top 20% words as features.
+        top_perc = .2
+        replacement_word = '<UNK>'
+        features, features_numeric_dict = get_features(data, top_perc, replacement_word)
 
-severe_toxic_set = train_data[train_data['severe_toxic'] == 1]
-obscene_set = train_data[train_data['obscene'] == 1]
-threat_set = train_data[train_data['threat'] == 1]
-insult_set = train_data[train_data['insult'] == 1]
-identity_hate_set = train_data[train_data['identity_hate'] == 1]
+    # Filter comments, then process to numeric values.
+    data['comment_vect_filtered'] = data['comment_vect_filtered'].apply(lambda x:
+                                                                        [replacement_word if i not in features else i
+                                                                            for i in x])
 
+    data['comment_vect_numeric'] = data['comment_vect_filtered'].apply(lambda x:
+                                                                       [features_numeric_dict[i]
+                                                                        for i in x]) # replace words with numeric values.
 
-
-
-# For each category select the top 20% words.
-
-# Replace the remaining words in the sentences with '<UNK>'
-
-# Replace the words in the sentences with a numeric value.
-
-
-'''
-unique_words = list(set(x for l in train_data['comment_vect'].values.tolist() for x in l)) # All unique words
-unique_words_dict = {unique_words[x]:x for x in range(len(unique_words))} # Create dictionairy from unique words
-train_data['comment_vect_numeric'] = train_data['comment_vect'].apply(lambda x: text_to_num(x)) # replace words with numeric values.
-print(train_data['comment_vect_numeric'])
-'''
+    data.to_csv('./processed_{}_data.csv'.format(value), encoding='utf-8')
