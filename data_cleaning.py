@@ -21,9 +21,9 @@ def get_features(data, top_perc, replacement_word):
     features = list(set(features))
 
     # Replace the remaining words in the sentences with '<UNK>'
-    # Replace the words in the sentences with a numeric value.
     features.append(replacement_word)
 
+    # Replace the words in the sentences with a numeric value.
     features_numeric_dict = {features[x]: x for x in range(len(features))}  # Create dictionairy from unique words
 
     return features, features_numeric_dict
@@ -59,7 +59,7 @@ for value in ['train', 'test']:
         features, features_numeric_dict = get_features(data, top_perc, replacement_word)
 
         # Save features as csv file.
-        df_features = pd.from_dict(features_numeric_dict)
+        df_features = pd.DataFrame(list(features_numeric_dict.items()), columns=['feature', 'numeric'])
         df_features.to_csv('./features.csv', encoding='utf-8')
 
     # Filter comments, then process to numeric values.
@@ -70,7 +70,6 @@ for value in ['train', 'test']:
     data['comment_vect_numeric'] = data['comment_vect_filtered'].apply(lambda x:
                                                                        [features_numeric_dict[i]
                                                                         for i in x]) # replace words with numeric values.
-
 
     # Save data
     data.to_csv('./processed_{}_data.csv'.format(value), encoding='utf-8')
