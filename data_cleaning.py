@@ -9,9 +9,8 @@ from keras.layers import Dense, Dropout, Activation, Embedding, TimeDistributed,
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from keras.preprocessing import sequence
-import h5py
 import pickle
-
+import sklearn
 
 # Load a pickled object
 def load_obj(name):
@@ -50,7 +49,7 @@ def get_features(data, top_perc, replacement_word):
 '''
 Load size_to_load of the dataset, 
 '''
-def load_data_vectorize(size_to_load=60000, top_perc = 1.0):
+def load_data_vectorize(size_to_load=10000, top_perc = 1.0):
 
     for value in ['train', 'test']:
 
@@ -125,59 +124,50 @@ def lstm_model(vocabulary, hidden_size = 200):
 
 
 def main():
-    data = load_data_vectorize()
-    # data = load_obj('processed_train_data')
+    # data = load_data_vectorize()
+    data = load_obj('processed_train_data')
 
-    # data = pd.read_csv('./data/processed_train_data.csv')
-    # print(data['comment_vect_numeric'][0])
-    #
-    #
-    # vocab_size = []
-    # for values in data['comment_vect_numeric']:
-    #     no_brackets = values.replace('[', '')
-    #     no_brackets = no_brackets.replace(']', '')
-    #     vocab_size.extend(no_brackets.split(', '))
-    #
-    #
-    # vocab_size = len(set(vocab_size))
-    # print(vocab_size) # 1964
-    #
-    #
-    #
-    # X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
-    #
-    # numbers = []
-    # for values in X_train:
-    #     no_brackets = values.replace('[', '')
-    #     no_brackets = no_brackets.replace(']', '')
-    #     temp = [int(x) for x in no_brackets.split(', ')]
-    #     numbers.append(temp)
-    #
-    # numbers2 = []
-    # for values in X_test:
-    #     no_brackets = values.replace('[', '')
-    #     no_brackets = no_brackets.replace(']', '')
-    #     temp = [int(x) for x in no_brackets.split(', ')]
-    #     numbers2.append(temp)
-    #
-    # X_train = sequence.pad_sequences(numbers, maxlen=200)
-    # X_test = sequence.pad_sequences(numbers2, maxlen=200)
-    #
-    # network = lstm_model(vocab_size)
-    # network.fit(X_train, y_train, nb_epoch=2, batch_size=32, verbose=2)
-    # score, accuracy = network.evaluate(X_test, y_test)
-    #
-    # # network.save('./data/lstm')
-    #
-    #
-    # predications = network.predict(X_test)
-    # print(predications[0])
-    # print(predications[20])
-    #
-    # print('Test score:', score)
-    # print('Test accuracy:', accuracy)
+    vocab_size  = len(set([x for l in data['comment_vect_numeric'].values for x in l]))
 
-# def score_function:
+    X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
+
+
+    X_train = sequence.pad_sequences(X_train, maxlen=200)
+    X_test = sequence.pad_sequences(X_test, maxlen=200)
+
+    network = lstm_model(vocab_size)
+    network.fit(X_train, y_train, nb_epoch=1, batch_size=32, verbose=2)
+    score, accuracy = network.evaluate(X_test, y_test)
+
+    # network.save('./data/lstm')
+
+
+    predications = network.predict(X_test)
+    print(predications[0])
+    print(predications[20])
+    print(predications[40])
+    print(predications[22])
+    print(predications[25])
+
+    print('Test score:', score)
+    print('Test accuracy:', accuracy)
+
+    print("average auc score" , score_function(y_test,predications))
+
+
+'''
+Column-wise AUC loss function
+with 'naive' threshold at .5
+'''
+# TODO: Is this really column wise ??  see:  https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge#evaluation
+def score_function(y_true, y_predict,threshold =.5):
+    y_predict[y_predict > threshold] = 1
+    y_predict[y_predict < threshold] = 0
+
+    score = sklearn.metrics.roc_auc_score(y_true, np.exp(y_predict))
+
+    print("score = ", score)
+    return np.mean(score)
 
 
 
