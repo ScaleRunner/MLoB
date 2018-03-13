@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd, tqdm
 import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import TweetTokenizer
@@ -10,8 +10,23 @@ from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from keras.preprocessing import sequence
 import h5py
+import pickle
 
 
+# Load a pickled object
+def load_obj(name):
+    with open('data/' + name + '.pkl', 'rb') as f:
+        return pickle.load(f)
+
+# Save a pickled object
+def save_obj(obj, name):
+    with open('data/' + name + '.pkl', 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+'''
+Get the top k percent of words for each class and represent those with a number
+Other words get the <UNK> token
+'''
 def get_features(data, top_perc, replacement_word):
     features = []
     for cat in ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']:
@@ -32,8 +47,10 @@ def get_features(data, top_perc, replacement_word):
 
     return features, features_numeric_dict
 
-
-def load_data_vectorize(size_to_load=10000, top_perc = 1.0):
+'''
+Load size_to_load of the dataset, 
+'''
+def load_data_vectorize(size_to_load=60000, top_perc = 1.0):
 
     for value in ['train', 'test']:
 
@@ -50,9 +67,6 @@ def load_data_vectorize(size_to_load=10000, top_perc = 1.0):
         tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
         data['comment_vect'] = data['comment_text'].apply(lambda x: tokenizer.tokenize(x))
 
-        ''''
-        LSTM
-        '''
 
         # Filter out stop words
         stop = stopwords.words('english')
@@ -78,7 +92,8 @@ def load_data_vectorize(size_to_load=10000, top_perc = 1.0):
                                                                                 for i in x]) # replace words with numeric values.
 
         # Save data
-        data.to_csv('./data/processed_{}_data.csv'.format(value), encoding='utf-8')
+        save_obj(data, 'processed_{}_data'.format(value))
+        # data.to_csv('./data/processed_{}_data.csv'.format(value), encoding='utf-8')
 
 
 def pandas_to_traintestsplit(dataframe, test_split = .3):
@@ -110,55 +125,61 @@ def lstm_model(vocabulary, hidden_size = 200):
 
 
 def main():
-    # data = load_data_vectorize()
-    data = pd.read_csv('./data/processed_train_data.csv')
-    print(data['comment_vect_numeric'][0])
+    data = load_data_vectorize()
+    # data = load_obj('processed_train_data')
+
+    # data = pd.read_csv('./data/processed_train_data.csv')
+    # print(data['comment_vect_numeric'][0])
+    #
+    #
+    # vocab_size = []
+    # for values in data['comment_vect_numeric']:
+    #     no_brackets = values.replace('[', '')
+    #     no_brackets = no_brackets.replace(']', '')
+    #     vocab_size.extend(no_brackets.split(', '))
+    #
+    #
+    # vocab_size = len(set(vocab_size))
+    # print(vocab_size) # 1964
+    #
+    #
+    #
+    # X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
+    #
+    # numbers = []
+    # for values in X_train:
+    #     no_brackets = values.replace('[', '')
+    #     no_brackets = no_brackets.replace(']', '')
+    #     temp = [int(x) for x in no_brackets.split(', ')]
+    #     numbers.append(temp)
+    #
+    # numbers2 = []
+    # for values in X_test:
+    #     no_brackets = values.replace('[', '')
+    #     no_brackets = no_brackets.replace(']', '')
+    #     temp = [int(x) for x in no_brackets.split(', ')]
+    #     numbers2.append(temp)
+    #
+    # X_train = sequence.pad_sequences(numbers, maxlen=200)
+    # X_test = sequence.pad_sequences(numbers2, maxlen=200)
+    #
+    # network = lstm_model(vocab_size)
+    # network.fit(X_train, y_train, nb_epoch=2, batch_size=32, verbose=2)
+    # score, accuracy = network.evaluate(X_test, y_test)
+    #
+    # # network.save('./data/lstm')
+    #
+    #
+    # predications = network.predict(X_test)
+    # print(predications[0])
+    # print(predications[20])
+    #
+    # print('Test score:', score)
+    # print('Test accuracy:', accuracy)
+
+# def score_function:
 
 
-    vocab_size = []
-    for values in data['comment_vect_numeric']:
-        no_brackets = values.replace('[', '')
-        no_brackets = no_brackets.replace(']', '')
-        vocab_size.extend(no_brackets.split(', '))
-
-
-    vocab_size = len(set(vocab_size))
-    print(vocab_size) # 1964
-
-
-
-    X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
-
-    numbers = []
-    for values in X_train:
-        no_brackets = values.replace('[', '')
-        no_brackets = no_brackets.replace(']', '')
-        temp = [int(x) for x in no_brackets.split(', ')]
-        numbers.append(temp)
-
-    numbers2 = []
-    for values in X_test:
-        no_brackets = values.replace('[', '')
-        no_brackets = no_brackets.replace(']', '')
-        temp = [int(x) for x in no_brackets.split(', ')]
-        numbers2.append(temp)
-
-    X_train = sequence.pad_sequences(numbers, maxlen=200)
-    X_test = sequence.pad_sequences(numbers2, maxlen=200)
-
-    network = lstm_model(vocab_size)
-    network.fit(X_train, y_train, nb_epoch=2, batch_size=32, verbose=2)
-    score, accuracy = network.evaluate(X_test, y_test)
-
-    # network.save('./data/lstm')
-
-
-    predications = network.predict(X_test)
-    print(predications[0])
-    print(predications[20])
-
-    print('Test score:', score)
-    print('Test accuracy:', accuracy)
 
 
 if __name__ == "__main__":
