@@ -5,9 +5,12 @@ from nltk.tokenize import TweetTokenizer
 #from gensim.models import word2vec
 from collections import Counter
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Embedding
+from keras.layers import Dense, Dropout, Activation, Embedding, TimeDistributed
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
+import itertools
+
+
 
 def get_features(data, top_perc, replacement_word):
     features = []
@@ -30,7 +33,7 @@ def get_features(data, top_perc, replacement_word):
     return features, features_numeric_dict
 
 
-def load_data_vectorize(size_to_load=1000):
+def load_data_vectorize(size_to_load=1000, top_perc = 1.0):
 
     for value in ['train', 'test']:
 
@@ -39,8 +42,6 @@ def load_data_vectorize(size_to_load=1000):
 
         # step 1: Remove NA values.
         data = data.dropna()
-
-        print("column titles", list(data))
 
         # TODO: Remove stopwords (custom list)
         # cust_stopwords = ['the', 'a', 'an', ',']
@@ -60,7 +61,6 @@ def load_data_vectorize(size_to_load=1000):
         # If training, get features
         if value == 'train':
             # For each category select the top 20% words as features.
-            top_perc = 1.0
             replacement_word = '<UNK>'
             features, features_numeric_dict = get_features(data, top_perc, replacement_word)
 
@@ -74,11 +74,8 @@ def load_data_vectorize(size_to_load=1000):
                                                                                 for i in x])
 
         data['comment_vect_numeric'] = data['comment_vect_filtered'].apply(lambda x:
-                                                                           [features_numeric_dict[i]
+                                                                           [(features_numeric_dict[i])
                                                                                 for i in x]) # replace words with numeric values.
-
-
-
 
         # Save data
         data.to_csv('./data/processed_{}_data.csv'.format(value), encoding='utf-8')
@@ -95,16 +92,20 @@ def pandas_to_traintestsplit(dataframe, test_split = 0.0):
 
 
 
-def LSTM():
+def LSTM(vocabulary, hidden_size = 200):
     model = Sequential()
 
     # Vocabulary = length total unique dict
-    model.add(Embedding(vocabulary, hidden_size, input_length=num_steps))
-    model.add(LSTM(hidden_size, return_sequences=True))
-    model.add(LSTM(hidden_size, return_sequences=True))
+    # Embedding layer creates word2vec vector
+    model.add(Embedding(input_dim=vocabulary ,output_dim=hidden_size))
+
+    model.add(LSTM(hidden_size))
+    model.add(LSTM(hidden_size))
     model.add(Dropout(0.2))
     model.add(TimeDistributed(Dense(vocabulary)))
     model.add(Activation('softmax'))
+    print(model.summary())
+
 
     return model
 
@@ -123,6 +124,7 @@ def main():
     print(len(set(numbers)))
 
     # print(list(data))
+
 
 
 if __name__ == "__main__":
