@@ -5,11 +5,11 @@ from nltk.tokenize import TweetTokenizer
 #from gensim.models import word2vec
 from collections import Counter
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Embedding, TimeDistributed
+from keras.layers import Dense, Dropout, Activation, Embedding, TimeDistributed, LSTM
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
-import itertools
-
+from keras.preprocessing import sequence
+import h5py
 
 
 def get_features(data, top_perc, replacement_word):
@@ -33,7 +33,7 @@ def get_features(data, top_perc, replacement_word):
     return features, features_numeric_dict
 
 
-def load_data_vectorize(size_to_load=1000, top_perc = 1.0):
+def load_data_vectorize(size_to_load=10000, top_perc = 1.0):
 
     for value in ['train', 'test']:
 
@@ -81,7 +81,7 @@ def load_data_vectorize(size_to_load=1000, top_perc = 1.0):
         data.to_csv('./data/processed_{}_data.csv'.format(value), encoding='utf-8')
 
 
-def pandas_to_traintestsplit(dataframe, test_split = 0.0):
+def pandas_to_traintestsplit(dataframe, test_split = .3):
 
     X = np.asarray(dataframe['comment_vect_numeric'])
     y = np.asarray(dataframe[['toxic','severe_toxic','obscene','threat','insult','identity_hate']])
@@ -92,18 +92,17 @@ def pandas_to_traintestsplit(dataframe, test_split = 0.0):
 
 
 
-def LSTM(vocabulary, hidden_size = 200):
-    model = Sequential()
+def lstm_model(vocabulary, hidden_size = 200):
 
+
+    model = Sequential()
     # Vocabulary = length total unique dict
     # Embedding layer creates word2vec vector
     model.add(Embedding(input_dim=vocabulary ,output_dim=hidden_size))
+    model.add(LSTM(hidden_size, dropout=.2))
+    model.add((Dense(6,activation='sigmoid')))
 
-    model.add(LSTM(hidden_size))
-    model.add(LSTM(hidden_size))
-    model.add(Dropout(0.2))
-    model.add(TimeDistributed(Dense(vocabulary)))
-    model.add(Activation('softmax'))
+    model.compile(loss = 'binary_crossentropy', optimizer='adam',metrics = ['accuracy'])
     print(model.summary())
 
 
@@ -115,16 +114,51 @@ def main():
     data = pd.read_csv('./data/processed_train_data.csv')
     print(data['comment_vect_numeric'][0])
 
-    numbers = []
+
+    vocab_size = []
     for values in data['comment_vect_numeric']:
         no_brackets = values.replace('[', '')
         no_brackets = no_brackets.replace(']', '')
-        numbers.extend(no_brackets.split(', '))
+        vocab_size.extend(no_brackets.split(', '))
 
-    print(len(set(numbers)))
 
-    # print(list(data))
+    vocab_size = len(set(vocab_size))
+    print(vocab_size) # 1964
 
+
+
+    X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
+
+    numbers = []
+    for values in X_train:
+        no_brackets = values.replace('[', '')
+        no_brackets = no_brackets.replace(']', '')
+        temp = [int(x) for x in no_brackets.split(', ')]
+        numbers.append(temp)
+
+    numbers2 = []
+    for values in X_test:
+        no_brackets = values.replace('[', '')
+        no_brackets = no_brackets.replace(']', '')
+        temp = [int(x) for x in no_brackets.split(', ')]
+        numbers2.append(temp)
+
+    X_train = sequence.pad_sequences(numbers, maxlen=200)
+    X_test = sequence.pad_sequences(numbers2, maxlen=200)
+
+    network = lstm_model(vocab_size)
+    network.fit(X_train, y_train, nb_epoch=2, batch_size=32, verbose=2)
+    score, accuracy = network.evaluate(X_test, y_test)
+
+    # network.save('./data/lstm')
+
+
+    predications = network.predict(X_test)
+    print(predications[0])
+    print(predications[20])
+
+    print('Test score:', score)
+    print('Test accuracy:', accuracy)
 
 
 if __name__ == "__main__":
