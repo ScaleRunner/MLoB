@@ -1,10 +1,15 @@
 import os
+import nltk
+import tensorflow
 from keras.models import Sequential
 from keras.layers import Dense
 import pandas as pd
 from features import extract_features, extract_labels, split_data
 import numpy as np
 import csv
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
@@ -37,7 +42,7 @@ def train_model(features, labels, model, verbose=1):
     features_train, features_validation, labels_train, labels_validation = split_data(features, labels)
 
     history = model.fit(features_train, labels_train,
-                        epochs=250,
+                        epochs=50,
                         batch_size=512,
                         verbose=verbose,
                         validation_data=(features_validation, labels_validation),
