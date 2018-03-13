@@ -1,16 +1,16 @@
 import os
 import nltk
-import tensorflow
-from keras.models import Sequential
+from keras.models import Sequential, optimizers
 from keras.layers import Dense
 import pandas as pd
-from features import extract_features, extract_labels, split_data
+from feature_extraction.features import extract_features, extract_labels, split_data
 import numpy as np
-import csv
+
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
+# Remove Tensorflow warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
 
@@ -31,24 +31,25 @@ def create_model(n_features, output_size):
     ])
 
     # Multiclass uses categorical cross-entropy
-    model.compile(optimizer='rmsprop',
+    optimizer = optimizers.Adam(lr=1e-4)
+    model.compile(optimizer=optimizer,
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
     return model
 
 
-def train_model(features, labels, model, verbose=1):
+def train_model(features, labels, model, n_epochs=50, batch_size=32, verbose=2):
     features_train, features_validation, labels_train, labels_validation = split_data(features, labels)
 
     history = model.fit(features_train, labels_train,
-                        epochs=50,
-                        batch_size=512,
+                        epochs=n_epochs,
+                        batch_size=batch_size,
                         verbose=verbose,
                         validation_data=(features_validation, labels_validation),
                         shuffle=True)
 
-    score = model.evaluate(features_validation, labels_validation, batch_size=128)
+    score = model.evaluate(features_validation, labels_validation, batch_size=batch_size)
     print(score)
 
     return history
@@ -58,7 +59,7 @@ def main():
     print("Loading Training Data")
     # features_train, labels_train = load_data('../processed_train_data.csv')
     # features_test, labels_test = load_data('../processed_test_data.csv')
-    features_train, labels_train = load_data('../data/train.csv', size=100)
+    features_train, labels_train = load_data('../data/train.csv', size=10000)
 
     n_features = features_train.shape[1]
     output_size = labels_train.shape[1]
@@ -71,7 +72,7 @@ def main():
     # Testing
     print("Loading Test Data")
     features_test, _ = load_data('../data/test.csv', train=False, size=100)
-    predictions = model.predict(features_test, verbose=1)
+    predictions = model.predict(features_test, verbose=2)
 
     np.savetxt("../predictions.csv", predictions, delimiter=',')
 
