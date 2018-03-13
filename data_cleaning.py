@@ -35,7 +35,7 @@ def load_data_vectorize(size_to_load=1000):
     for value in ['train', 'test']:
 
          # Load data
-        data = pd.read_csv('./data/train.csv', encoding='utf-8').head(size)
+        data = pd.read_csv('./data/train.csv', encoding='utf-8').head(size_to_load)
 
         # step 1: Remove NA values.
         data = data.dropna()
@@ -111,8 +111,18 @@ def LSTM():
 
 def main():
     # data = load_data_vectorize()
-    data = pd.read_csv('/home/winston/PycharmProjects/MLoB/data/processed_train_data.csv')
-    print(list(data))
+    data = pd.read_csv('./data/processed_train_data.csv')
+    print(data['comment_vect_numeric'][0])
+
+    numbers = []
+    for values in data['comment_vect_numeric']:
+        no_brackets = values.replace('[', '')
+        no_brackets = no_brackets.replace(']', '')
+        numbers.extend(no_brackets.split(', '))
+
+    print(len(set(numbers)))
+
+    # print(list(data))
 
 
 if __name__ == "__main__":
