@@ -1,5 +1,5 @@
 # .gitignore IDE
-**/.idea/
+.idea/
 **/__pycache__/
 .vscode/
 
