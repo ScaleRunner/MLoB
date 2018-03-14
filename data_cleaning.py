@@ -4,7 +4,7 @@ import pandas as pd
 # Text libs
 from nltk.corpus import stopwords
 from nltk.tokenize import TweetTokenizer
-
+from tqdm import tqdm
 
 def get_embedding_ids(data, top_perc, replacement_word):
     """
@@ -17,9 +17,9 @@ def get_embedding_ids(data, top_perc, replacement_word):
     """
 
     embedding_ids = []
-    for cat in ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']:
+    for cat in tqdm(['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']):
         subset = data[data[cat] == 1]
-        cnt_words = Counter([x for l in subset['comment_vect_filtered'].values for x in l])
+        cnt_words = Counter(([x for l in subset['comment_vect_filtered'].values for x in l]))
         most_common_words = cnt_words.most_common(int(len(cnt_words.keys()) * top_perc))
         embedding_ids.extend([x[0] for x in most_common_words])
 
@@ -31,7 +31,7 @@ def get_embedding_ids(data, top_perc, replacement_word):
 
     # Replace the words in the sentences with a numeric value.
     embedding_ids_numeric_dict = {embedding_ids[x]: x for x in
-                                  range(len(embedding_ids))}  # Create dictionairy from unique words
+                                  range(len(embedding_ids))}  # Create dictionary from unique words
 
     return embedding_ids, embedding_ids_numeric_dict
 
@@ -61,9 +61,11 @@ def main(size_to_load=100, top_perc=0.2):
         stop = stopwords.words('english')
         data['comment_vect_filtered'] = data['comment_vect'].apply(lambda x: [i.lower() for i in x if i not in stop])
 
+
+
         # If training, get embedding_ids
         if value == 'train':
-            # For each category select the top 20% words as embedding_ids.
+            # For each category select the top % words as embedding_ids.
             replacement_word = '<UNK>'
             embedding_ids, embedding_ids_numeric_dict = get_embedding_ids(data, top_perc, replacement_word)
 
@@ -72,15 +74,17 @@ def main(size_to_load=100, top_perc=0.2):
             df_embedding_ids.to_json('./data/embedding_ids.json')
 
         # Filter comments, then process to numeric values.
-        data['comment_vect_filtered'] = data['comment_vect_filtered'].apply(lambda x:
+        data['comment_vect_filtered'] = tqdm(data['comment_vect_filtered'].apply(lambda x:
                                                                             [replacement_word if i not in embedding_ids else i
-                                                                             for i in x])
+                                                                             for i in x]))
         # replace words with numeric values.
-        data['comment_vect_numeric'] = data['comment_vect_filtered'].apply(lambda x:
+        data['comment_vect_numeric'] = tqdm(data['comment_vect_filtered'].apply((lambda x:
                                                                            [embedding_ids_numeric_dict[i]
-                                                                            for i in x])
+                                                                            for i in x])))
+
 
         data.to_json('./data/processed_{}_data.json'.format(value))
+        print("Finished")
 
 
 if __name__ == "__main__":

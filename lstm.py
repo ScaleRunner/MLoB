@@ -44,31 +44,34 @@ def lstm_model(vocabulary, hidden_size=200):
 Column-wise AUC loss function
 with 'naive' threshold at .5
 '''
-
-
 # TODO: Is this really column wise ??  see:  https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge#evaluation
 def score_function(y_true, y_predict, threshold=.5):
-    y_predict[y_predict > threshold] = 1
-    y_predict[y_predict < threshold] = 0
+    # y_predict[y_predict > threshold] = 1
+    # y_predict[y_predict < threshold] = 0
 
-    score = sklearn.metrics.roc_auc_score(y_true, np.exp(y_predict))
+    score = []
+    for i in range(4):
+        print(i)
+        score.append(sklearn.metrics.roc_auc_score(y_true[:, i], y_predict[:, i]))
 
-    print("score = ", score)
     return np.mean(score)
 
 def main():
-    # data = load_data_vectorize()
-    data = load_obj('processed_train_data')
+    # data = load_obj('processed_train_data')
+    data = pd.read_json('./data/processed_train_data.json')
+
 
     vocab_size = len(set([x for l in data['comment_vect_numeric'].values for x in l]))
 
     X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
 
+    print(X_test.shape)
+
     X_train = sequence.pad_sequences(X_train, maxlen=200)
     X_test = sequence.pad_sequences(X_test, maxlen=200)
 
     network = lstm_model(vocab_size)
-    network.fit(X_train, y_train, nb_epoch=1, batch_size=32, verbose=2)
+    network.fit(X_train, y_train, epochs=1, batch_size=32, verbose=2)
     score, accuracy = network.evaluate(X_test, y_test)
 
     predications = network.predict(X_test)
