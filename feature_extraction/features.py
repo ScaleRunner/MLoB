@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 
 stop_words = set(stopwords.words('english'))
 
+
 def split_data(features, labels, test_percentage=0.1):
     features_train, features_test, labels_train, labels_test = \
         train_test_split(features, labels, shuffle=True, test_size=test_percentage)

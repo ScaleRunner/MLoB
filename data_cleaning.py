@@ -1,21 +1,21 @@
-import pandas as pd
-import numpy as np
+from collections import Counter
 
+import pandas as pd
 # Text libs
 from nltk.corpus import stopwords
 from nltk.tokenize import TweetTokenizer
-from collections import Counter
-import pickle
-
-
-
-'''
-Get the top k percent of words for each class and represent those with a number
-Other words get the <UNK> token
-'''
 
 
 def get_embedding_ids(data, top_perc, replacement_word):
+    """
+    Get the top k percent of words for each class and represent those with a number
+    Other words get the <UNK> token
+    :param data:
+    :param top_perc:
+    :param replacement_word:
+    :return:
+    """
+
     embedding_ids = []
     for cat in ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']:
         subset = data[data[cat] == 1]
@@ -36,12 +36,13 @@ def get_embedding_ids(data, top_perc, replacement_word):
     return embedding_ids, embedding_ids_numeric_dict
 
 
-'''
-Load size_to_load of the dataset, 
-'''
-
-
 def main(size_to_load=100, top_perc=0.2):
+    """
+    Load size_to_load of the dataset,
+    :param size_to_load:
+    :param top_perc:
+    :return:
+    """
     for value in ['train', 'test']:
         # Load data
         data = pd.read_csv('./data/{}.csv'.format(value), encoding='utf-8', nrows=size_to_load)
@@ -59,10 +60,6 @@ def main(size_to_load=100, top_perc=0.2):
         # Filter out stop words and convert the resulting set to lower case strings.
         stop = stopwords.words('english')
         data['comment_vect_filtered'] = data['comment_vect'].apply(lambda x: [i.lower() for i in x if i not in stop])
-
-        # Filter out stop words
-        stop = stopwords.words('english')
-        data['comment_vect_filtered'] = data['comment_vect'].apply(lambda x: [i for i in x if i not in stop])
 
         # If training, get embedding_ids
         if value == 'train':

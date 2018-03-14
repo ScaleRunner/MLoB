@@ -3,10 +3,6 @@
 **/__pycache__/
 .vscode/
 
-# Project Specific
-data/*.zip
-data/*.csv
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
