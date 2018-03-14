@@ -3,7 +3,7 @@ import nltk
 from keras.models import Sequential, optimizers
 from keras.layers import Dense
 import pandas as pd
-from feature_extraction.features import extract_features, extract_labels, split_data
+from feature_extraction.features import extract_features, extract_labels, split_data, normalize_features
 import numpy as np
 
 nltk.download('stopwords')
@@ -17,6 +17,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 def load_data(path, train=True, size=None):
     df = pd.read_csv(path, index_col=0, nrows=size, encoding='utf-8')
     features = extract_features(df)
+    features = normalize_features(features)
 
     labels = extract_labels(df) if train else None
 
@@ -59,7 +60,7 @@ def main():
     print("Loading Training Data")
     # features_train, labels_train = load_data('../processed_train_data.csv')
     # features_test, labels_test = load_data('../processed_test_data.csv')
-    features_train, labels_train = load_data('../data/train.csv', size=10000)
+    features_train, labels_train = load_data('../data/train.csv', size=1000)
 
     n_features = features_train.shape[1]
     output_size = labels_train.shape[1]

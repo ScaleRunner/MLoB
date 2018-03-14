@@ -104,3 +104,12 @@ def extract_labels(df):
         label_series = sample[categories]
         labels.append(label_series.values)
     return labels
+
+
+def normalize_features(features):
+    norm_mean = np.mean(features, axis=0)
+    norm_std = np.std(features, axis=0)
+
+    features = (features - norm_mean)/norm_std
+
+    return features
