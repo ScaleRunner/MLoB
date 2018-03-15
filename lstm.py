@@ -5,9 +5,9 @@ from keras.layers import Dense, Dropout, Activation, Embedding, TimeDistributed,
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from keras.preprocessing import sequence
-import pickle
 import sklearn
 
+'''
 # Load a pickled object
 def load_obj(name):
     with open('data/' + name + '.pkl', 'rb') as f:
@@ -17,6 +17,7 @@ def load_obj(name):
 def save_obj(obj, name):
     with open('data/' + name + '.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+'''
 
 def pandas_to_traintestsplit(dataframe, test_split=.3):
     X = np.asarray(dataframe['comment_vect_numeric'])
@@ -58,7 +59,7 @@ def score_function(y_true, y_predict, threshold=.5):
 
 def main():
     # data = load_data_vectorize()
-    data = load_obj('processed_train_data')
+    data = pd.read_json('./data/processed_train_1000_data.json')
 
     vocab_size = len(set([x for l in data['comment_vect_numeric'].values for x in l]))
 

@@ -62,7 +62,7 @@ def main(size_to_load=100, top_perc=0.2):
 
         # Filter out stop words
         stop = stopwords.words('english')
-        data['comment_vect_filtered'] = data['comment_vect'].apply(lambda x: [i for i in x if i not in stop])
+        data['comment_vect_filtered'] = data['comment_vect_filtered'].apply(lambda x: [i for i in x if i not in stop])
 
         # If training, get embedding_ids
         if value == 'train':
@@ -72,7 +72,7 @@ def main(size_to_load=100, top_perc=0.2):
 
             # Save embedding_ids as csv file.
             df_embedding_ids = pd.DataFrame(list(embedding_ids_numeric_dict.items()), columns=['feature', 'numeric'])
-            df_embedding_ids.to_json('./data/embedding_ids.json')
+            df_embedding_ids.to_json('./data/embedding_ids_all.json')
 
         # Filter comments, then process to numeric values.
         data['comment_vect_filtered'] = data['comment_vect_filtered'].apply(lambda x:
@@ -83,8 +83,7 @@ def main(size_to_load=100, top_perc=0.2):
                                                                            [embedding_ids_numeric_dict[i]
                                                                             for i in x])
 
-        data.to_json('./data/processed_{}_data.json'.format(value))
-
+        data.to_json('./data/processed_{}_all_data.json'.format(value))
 
 if __name__ == "__main__":
     main()
