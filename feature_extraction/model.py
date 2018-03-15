@@ -16,6 +16,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
 def load_data(path, train=True, size=None):
     df = pd.read_csv(path, index_col=0, nrows=size, encoding='utf-8')
+    df.dropna()
     features = extract_features(df)
     features = normalize_features(features)
 
@@ -60,7 +61,7 @@ def main():
     print("Loading Training Data")
     # features_train, labels_train = load_data('../processed_train_data.csv')
     # features_test, labels_test = load_data('../processed_test_data.csv')
-    features_train, labels_train = load_data('../data/train.csv', size=1000)
+    features_train, labels_train = load_data('../data/train.csv')
 
     n_features = features_train.shape[1]
     output_size = labels_train.shape[1]
@@ -72,7 +73,7 @@ def main():
 
     # Testing
     print("Loading Test Data")
-    features_test, _ = load_data('../data/test.csv', train=False, size=100)
+    features_test, _ = load_data('../data/test.csv', train=False)
     predictions = model.predict(features_test, verbose=2)
 
     np.savetxt("../predictions.csv", predictions, delimiter=',')
