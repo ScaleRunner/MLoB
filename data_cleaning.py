@@ -17,7 +17,6 @@ def get_embedding_ids(data, top_perc, replacement_word):
         if cat == 'Be_nice_bruh':
             subset = data[(data['toxic'] == 0) & (data['severe_toxic'] == 0) & (data['obscene'] == 0)
                 & (data['threat'] == 0) & (data['insult'] == 0) & (data['identity_hate'] == 0)]
-            print(subset)
         else:
             subset = data[data[cat] == 1]
 
