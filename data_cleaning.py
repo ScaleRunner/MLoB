@@ -4,6 +4,9 @@ import pandas as pd
 from nltk.corpus import stopwords
 from nltk.tokenize import TweetTokenizer
 from collections import Counter
+from tqdm import tqdm, tqdm_pandas
+
+tqdm_pandas(tqdm())
 
 '''
 Get the top k percent of words for each class and represent those with a number
@@ -13,7 +16,7 @@ Other words get the <UNK> token
 
 def get_embedding_ids(data, top_perc, replacement_word):
     embedding_ids = []
-    for cat in ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate', 'Be_nice_bruh']:
+    for cat in (['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate', 'Be_nice_bruh']):
         if cat == 'Be_nice_bruh':
             subset = data[(data['toxic'] == 0) & (data['severe_toxic'] == 0) & (data['obscene'] == 0)
                 & (data['threat'] == 0) & (data['insult'] == 0) & (data['identity_hate'] == 0)]
@@ -72,11 +75,11 @@ def main(size_to_load=None, top_perc=0.1):
             df_embedding_ids.to_json('./data/embedding_ids_all.json')
 
         # Filter comments, then process to numeric values.
-        data['comment_vect_filtered'] = data['comment_vect_filtered'].apply(lambda x:
+        data['comment_vect_filtered'] = data['comment_vect_filtered'].progress_apply(lambda x:
                                                                             [replacement_word if i not in embedding_ids else i
-                                                                             for i in x])
+                                                                             for i in (x)])
         # replace words with numeric values.
-        data['comment_vect_numeric'] = data['comment_vect_filtered'].apply(lambda x:
+        data['comment_vect_numeric'] = data['comment_vect_filtered'].progress_apply(lambda x:
                                                                            [embedding_ids_numeric_dict[i]
                                                                             for i in x])
 
