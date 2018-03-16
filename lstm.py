@@ -23,12 +23,36 @@ def save_obj(obj, name):
 '''
 
 def pandas_to_traintestsplit(dataframe, test_split=.3):
-    X = np.asarray(dataframe['comment_vect_numeric'])
-    y = np.asarray(dataframe[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']])
+    X_train = []
+    X_test = []
+    y_train = []
+    y_test = []
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_split, random_state=42)
+    for kind in ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']:
+        data = dataframe[dataframe[kind] == 1]
+        x = np.asarray(data['comment_vect_numeric'])
+        y = np.asarray(data[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']])
 
-    return X_train, X_test, y_train, y_test
+        X_train_new, X_test_new, y_train_new, y_test_new = train_test_split(x, y, test_size=5)
+        X_train.append(X_train_new)
+        X_test.append(X_test_new)
+        y_train.append(y_train_new)
+        y_test.append(y_test_new)
+
+
+    data = dataframe[(dataframe['toxic'] == 0) & (dataframe['severe_toxic'] == 0) & (dataframe['obscene'] == 0)
+                & (dataframe['threat'] == 0) & (dataframe['insult'] == 0) & (dataframe['identity_hate'] == 0)]
+    x = np.asarray(data['comment_vect_numeric'])
+    y = np.asarray(data[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']])
+
+    X_train_new, X_test_new, y_train_new, y_test_new = train_test_split(x, y, test_size=5)
+    X_train.append(X_train_new)
+    X_test.append(X_test_new)
+    y_train.append(y_train_new)
+    y_test.append(y_test_new)
+
+    
+    return np.asarray(X_train).flatten(), np.asarray(X_test).flatten(), np.asarray(y_train).flatten(), np.asarray(y_test).flatten()
 
 
 def lstm_model(vocabulary, hidden_size=200):
@@ -115,4 +139,6 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    create_submission()
+    data = pd.read_json('./data/processed_train_all_data.json')
+
+    X_train, X_test, y_train, y_test = pandas_to_traintestsplit(data)
