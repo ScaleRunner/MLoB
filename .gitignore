@@ -1,3 +1,9 @@
+
+# ignore the feature.csv because it's 1 gb
+features.csv
+labels.csv
+
+
 # .gitignore IDE
 .idea/
 **/__pycache__/

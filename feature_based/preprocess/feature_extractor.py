@@ -4,16 +4,14 @@ from nltk.tokenize import wordpunct_tokenize, sent_tokenize
 import nltk
 import string
 from tqdm import tqdm, tqdm_pandas
-from sklearn.model_selection import train_test_split
+
+
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 stop_words = set(stopwords.words('english'))
 
-
-def split_data(features, labels, test_percentage=0.1):
-    features_train, features_test, labels_train, labels_test = \
-        train_test_split(features, labels, shuffle=True, test_size=test_percentage)
-
-    return np.array(features_train), np.array(features_test), np.array(labels_train), np.array(labels_test)
 
 
 def extract_features_from_string(line):
@@ -92,7 +90,7 @@ def extract_features(df):
     features = []
 
     texts = df['comment_text']
-    for text in texts:
+    for text in tqdm(texts, desc="Extracting features"):
         features.append(extract_features_from_string(text))
 
     return features
@@ -101,7 +99,7 @@ def extract_features(df):
 def extract_labels(df):
     categories = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
     labels = []
-    for _, sample in tqdm(df.iterrows(), desc="Processing Data", unit="samples", total=len(df)):
+    for _, sample in tqdm(df.iterrows(), desc="getting labels", unit="samples", total=len(df)):
         label_series = sample[categories]
         labels.append(label_series.values)
     return labels
@@ -110,6 +108,8 @@ def extract_labels(df):
 def normalize_features(features):
     norm_mean = np.mean(features, axis=0)
     norm_std = np.std(features, axis=0)
+    # prevent NANning the numbers
+    norm_std[norm_std == 0] = 1
 
     features = (features - norm_mean)/norm_std
 
