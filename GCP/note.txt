@@ -1,0 +1,17 @@
+0. These notes assume that your network is in your current path, so ./ should consist your lstm.py file.
+1. follow instructions up until 'Running locally'. http://liufuyang.github.io/2017/04/02/just-another-tensorflow-beginner-guide-4.html
+2. do this: python -m lstm --train-file=processed_train_1000_data.json --job-dir=./tmp/lstm
+3. Follow rest of guide, to train with gcloud:
+gcloud ml-engine local train --module-name lstm --package-path ./ -- --train-file processed_train_1000_data.json --job-dir ./tmp/lstm
+4. Go to tensorboard using: 
+python -m tensorflow.tensorboard --logdir=./tmp/lstm/logs --port=8000 --reload_interval=5
+
+(tensorboard at localhost:8000)
+
+5. Run on the cloud using:
+
+
+(Make sure to change REGION accordingly)
+
+gcloud ml-engine jobs submit training 'mlip-test-1' --stream-logs --runtime-version 1.4 --job-dir gs://mlip-test/'mlip-test-1' --runtime-version 1.0 --module-name lstm --package-path ./ --region europe-west1 --config=cloudml-gpu.yaml -- --train-file gs://mlip-test/processed_train_1000_data.json
+
