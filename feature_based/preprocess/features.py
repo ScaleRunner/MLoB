@@ -3,7 +3,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import wordpunct_tokenize, sent_tokenize
 import nltk
 import string
-from tqdm import tqdm, tqdm_pandas
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 
 stop_words = set(stopwords.words('english'))
@@ -98,7 +98,7 @@ def extract_features(df):
     df['num_punctuation'] = df['comment_text'].apply(
         lambda comment: sum(comment.count(w) for w in '.,;:'))
     df['num_symbols'] = df['comment_text'].apply(
-        lambda comment: sum(comment.count(w) for w in '*&$%'))
+        lambda comment: sum(comment.count(w) for w in '*&$%#@'))
     df['num_words'] = df['comment_text'].apply(lambda comment: len(comment.split()))
     df['num_unique_words'] = df['comment_text'].apply(
         lambda comment: len(set(w for w in comment.split())))
@@ -107,6 +107,7 @@ def extract_features(df):
     return df.as_matrix(columns=['total_length', 'capitals', 'caps_vs_length', 'num_exclamation_marks',
                                  'num_question_marks', 'num_punctuation', 'num_symbols', 'num_words',
                                  'num_unique_words', 'words_vs_unique'])
+
     # features = []
     #
     # texts = df['comment_text']
@@ -129,9 +130,7 @@ def extract_labels(df):
 
 def normalize_features(features):
 
-    features_min = np.min(features, axis=0)
-    features_max = np.max(features, axis=0)
-    for i in range(len(features)):
-        features[i] = (features[i] - features_min) / (features_max - features_min)
+    scaler = MinMaxScaler()
+    features = scaler.fit_transform(features)
 
     return features

@@ -1,19 +1,9 @@
-import os
-import nltk
 import pandas as pd
 from feature_based.preprocess.features import extract_features, extract_labels, split_data, normalize_features
 import numpy as np
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import SVC
 import sklearn
-
-
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-
-# Remove Tensorflow warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 
 
 def load_data(path, train=True, size=None):
@@ -48,8 +38,9 @@ def main():
     features_train, labels_train, _ = load_data('../data/train.csv')
     print("Training has nan:", np.isnan(features_train).any())
 
-    # Training
-    clf = OneVsRestClassifier(SVC(kernel='linear'))
+    # Training - Uses all but one CPU (change n_jobs to -1 to use all)
+    
+    clf = OneVsRestClassifier(SVC(kernel='rbf', probability=True, verbose=True), n_jobs=-2)
     clf.fit(features_train, labels_train)
 
     # Check AUC score for training
@@ -62,9 +53,9 @@ def main():
     print("Testing has nan:", np.isnan(features_test).any())
 
     predictions_test = clf.predict_proba(features_test)
-    np.savetxt("../predictions.csv", predictions_test, delimiter=',')
+    np.savetxt("../SVC_predictions.csv", predictions_test, delimiter=',')
 
-    with open("../predictions_submission.csv", "w") as f:
+    with open("../SVC_predictions_submission.csv", "w") as f:
         f.write("id,toxic,severe_toxic,obscene,threat,insult,identity_hate\n")
         for i, preds in enumerate(predictions_test):
             f.write("{},{},{},{},{},{},{}\n".format(ids[i], *preds))
