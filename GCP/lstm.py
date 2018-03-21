@@ -82,7 +82,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Input Arguments
     parser.add_argument(
-      '--train-file',
+      '--train-files',
       help='GCS or local paths to training data',
       required=True
     )

@@ -128,7 +128,6 @@ def main():
 
     network, X_test, y_test = train_lstm(data,epochs=1)
 
-
     predictions = network.predict(X_test)
     score, accuracy = network.evaluate(X_test, y_test)
 

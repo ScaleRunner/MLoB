@@ -10,8 +10,8 @@ python -m tensorflow.tensorboard --logdir=./tmp/lstm/logs --port=8000 --reload_i
 
 5. Run on the cloud using:
 
-
 (Make sure to change REGION accordingly)
 
-gcloud ml-engine jobs submit training 'mlip-test-1' --stream-logs --runtime-version 1.4 --job-dir gs://mlip-test/'mlip-test-1' --runtime-version 1.0 --module-name lstm --package-path ./ --region europe-west1 --config=cloudml-gpu.yaml -- --train-file gs://mlip-test/processed_train_1000_data.json
-
+gcloud ml-engine jobs submit training mltest3 --stream-logs --runtime-version 1.4 --job-d
+ir gs://mlip-test/mlip-test3 --package-path ./ --module-name lstm --region europe-west1 -- --train-files gs://mlip-test/proc
+essed_train_1000_data.json
