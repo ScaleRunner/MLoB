@@ -1,17 +1,30 @@
-0. These notes assume that your network is in your current path, so ./ should consist your lstm.py file.
+Note:
+This structure is for usage of Keras. If you don't use Keras, then certain
+parts of the code aren't nec and you'll need a diff way of exporting
+your model (code areas for keras are shown).
+
+required path structure:
+- main
+-- trainer
+--- __init__.py
+--- module.py (in our case it's named lstm.py)
+--- cloudml-gpu.yaml
+-- setup.py
+
+-1. setup.py should contain all the required packages.
+0. These notes assume the path structure mentioned above.
 1. follow instructions up until 'Running locally'. http://liufuyang.github.io/2017/04/02/just-another-tensorflow-beginner-guide-4.html
-2. do this: python -m lstm --train-file=processed_train_1000_data.json --job-dir=./tmp/lstm
+2. Test your network locally: python -m lstm --train-file=processed_train_1000_data.json --job-dir=./tmp/lstm
 3. Follow rest of guide, to train with gcloud:
 gcloud ml-engine local train --module-name lstm --package-path ./ -- --train-file processed_train_1000_data.json --job-dir ./tmp/lstm
-4. Go to tensorboard using: 
-python -m tensorflow.tensorboard --logdir=./tmp/lstm/logs --port=8000 --reload_interval=5
 
-(tensorboard at localhost:8000)
-
-5. Run on the cloud using:
+6. Run on the cloud using:
 
 (Make sure to change REGION accordingly)
 
-gcloud ml-engine jobs submit training mltest3 --stream-logs --runtime-version 1.4 --job-d
-ir gs://mlip-test/mlip-test3 --package-path ./ --module-name lstm --region europe-west1 -- --train-files gs://mlip-test/proc
-essed_train_1000_data.json
+gcloud ml-engine jobs submit training mltest16 --stream-logs --runtime-version 1.4 --job-dir gs://mlip-test/mlip-test16 --package-path ./trainer --module-name trainer.lstm --region europe-west1 -- --train-files gs://mlip-test/processed_train_1000_data.json
+
+After this, the model is saved in the job-dir.
+
+--- predictions ----
+7.

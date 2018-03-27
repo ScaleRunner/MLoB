@@ -1,8 +1,8 @@
+from __future__ import absolute_import
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Embedding, TimeDistributed, LSTM
-from keras.optimizers import SGD
+from keras.layers import Dense, Embedding, LSTM
 from sklearn.model_selection import train_test_split
 from keras.preprocessing import sequence
 import sklearn
@@ -49,9 +49,9 @@ def score_function(y_true, y_predict, threshold=.5):
     print("score = ", score)
     return np.mean(score)
 
-def main(train_file='processed_train_1000_data.json'):
+def main(train_files='gs://mlip-test/processed_train_1000_data.json', job_dir='gs://mlip-test/mlip-test15', **args):
     # Load data from JSON file.
-    with file_io.FileIO(train_file, 'r') as f:
+    with file_io.FileIO(train_files, 'r') as f:
         json_data = json.load(f)
     data = pd.DataFrame.from_dict(json_data)
 
@@ -78,6 +78,16 @@ def main(train_file='processed_train_1000_data.json'):
 
     print("average auc score", score_function(y_test, predications))
 
+
+    # Save model
+    # Save the model locally
+    network.save('model.h5')
+
+    # Save model.h5 on to google storage
+    with file_io.FileIO('model.h5', mode='r') as input_f:
+        with file_io.FileIO(job_dir + '/model.h5', mode='w+') as output_f:
+            output_f.write(input_f.read())
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Input Arguments
@@ -86,14 +96,13 @@ if __name__ == '__main__':
       help='GCS or local paths to training data',
       required=True
     )
-
     parser.add_argument(
-      '--job-dir',
-      help='GCS location to write checkpoints and export models',
-      required=True
+        '--job-dir',
+        help='GCS location to write checkpoints and export models',
+        required=True
     )
     args = parser.parse_args()
     arguments = args.__dict__
-    job_dir = arguments.pop('job_dir')
-    
+    print('arguments are: '.format(arguments))
+
     main(**arguments)
