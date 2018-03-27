@@ -27,4 +27,8 @@ gcloud ml-engine jobs submit training mltest16 --stream-logs --runtime-version 1
 After this, the model is saved in the job-dir.
 
 --- predictions ----
-7.
+7. Download the h5 model using the command below (or download it manually) and make your own predictions by loading the model. As we're using Keras and not TF, we couldn't
+find a way to use the Keras model directly to predict on GCP. Prediction, however, shouldn't be a computationally expensive task and
+hopefully one of your teammate's computers will be able to handle it :P. <-- from https://www.youtube.com/watch?v=VxnHf-FfWKY
+
+Can download using: gsutil cp gs://mlip-test/mlip-test16/model.h5 ./
