@@ -26,7 +26,16 @@
 	
 	One important characteristic of our data is that the set is very imbalanced. This posed many challenges to us.
 	
+	\begin{figure}[h]
+		\includegraphics[width=0.4\textwidth]{img/distribution_histogram}
+		\caption{Figure from Kaggle \cite{abc}}
+	\end{figure}
 	%TODO name the challenges
+	
+	
+	\subsection*{Data Preprocessing}
+	
+	Since the data consists of raw Wikipedia comments, we have to do some preprocessing to convert the words to lowercase and change words that are spelled erroneously to the correct spelling. We use the TweetTokenizer to handle this for us.
 	
 	\section{Feature based models}
 	\subsection{Feature Extraction}
@@ -55,9 +64,11 @@
 	
 	\section{Neural Networks}
 	
-	Having implemented these feature based approaches, we decided it might be better to use a neural network model. In particular, we decided to use the LSTM (Long Short Term Memory), since LSTM's are recurrent neural networks, so it can learn the context of words in sentences. First we tried to use the most simple LSTM we could think of.
+	Having implemented these feature based approaches, we decided it might be better to use a neural network model. We decided to use the LSTM (Long Short Term Memory), because LSTM's are recurrent neural networks, so it can learn the context of words in sentences. First we tried to use the most simple LSTM we could think of.
 	
-	After that, we found that on Kaggle there was a very well performing LSTM approach called the bidirectional LSTM. This means that we feed the sentence twice to the LSTM, once normally, from front to back, and once flipped.
+	%TODO describe this lstm and its aoc
+	
+	After that, we found  very well performing LSTM based approach on Kaggle (a bidirectional LSTM). This means that we feed the sentence twice to the LSTM, once normally, from front to back, and once flipped.
 	\begin{figure}
 	\begin{verbatim}	
 	    A forward and backwardsentence
@@ -67,18 +78,31 @@
 	\end{figure}
 	
 	
-	We implemented two different LSTM.
-	
-	
-
 	We implemented a 1 dimensional convolutional neural network.
 	
-
+	
 
 	
 	\section{Validation}
 	
 	
+	\section{Next Steps}
+	After the first competition, we have already learned many things. 
 	
+	\subsection{Data handling}
+	
+	\subsection{Ensemble}
+	
+	\subsection{Division of tasks}
+	
+	
+	\begin{thebibliography}{xx}
+		\bibitem{abc}
+		\textsc{Jagan}, \textit{Stop the S@\#\$ - Toxic Comments EDA},
+		 https://www.kaggle.com/jagangupta/stop-the-s-toxic-comments-eda
+		
+			
+		
+	\end{thebibliography}
 	
 \end{document}
