@@ -7,7 +7,7 @@ required path structure:
 - main
 -- trainer
 --- __init__.py
---- module.py (in our case it's named lstm.py)
+--- train.py
 --- cloudml-gpu.yaml
 -- setup.py
 
