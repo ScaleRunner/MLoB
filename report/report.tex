@@ -5,6 +5,12 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage[normalem]{ulem}
+
+
+
+\newcommand\hl{\bgroup\markoverwith
+	{\textcolor{yellow}{\rule[-.5ex]{.1pt}{2.5ex}}}\ULon}
 
 
 
@@ -51,16 +57,36 @@
 	In total we produced about ten features.
 	
 	We used these features to train various other models on. We will evaluate each model seperately, but in the end, none of these feature based models managed to produce convincing results.
-		\subsection{Models}
+	
+	
 	\subsection{Feature Extraction Part 2}
 	
-	After a meeting with our supervisor, we thought that a problem with our feature extraction was that we might be using to little features. Since we are trying to predict 6 classes seperately, and we are using a quite complex set, the dimensionality of the set is probably higher than 10. That is why we decided to introduce some extra features.
+	After a meeting with our supervisor, we thought that a problem with our feature extraction was that we might be using to little features. Since we are trying to predict 6 classes separately, and we are using a quite complex set, the dimensionality of the set is probably higher than 10. That is why we decided to introduce some extra features.
 	
 	\begin{itemize}
 		\item For a list of swear words (since we are doing \emph{toxic} comment classification), we added a feature denoting whether that particular word occurred in the comment.
 		\item {\color{red}More features??} 
 	\end{itemize}
 	
+	This greatly improved our results.
+
+	\subsection{Models}
+	\hl{TODO: include a table with the results of these models using the most up to date feature extraction (if someone has time left, use both feature extractions, to compare and see if there is much improvement)}
+	
+%	\subsubsection*{MultiLayer Perceptrons}
+	\textbf{Multilayer Perceptrons}
+	The multilater perceptron (MLP) is a very simple neural network, using only fully connected (or dense) layers. In our case, the input consisted of the total number of features, and we used 6 units as output, each denoting the probability that that one of the six respective was active for the current sample. 
+	
+	We experimented with various configurations of this setup. We varied the number of layers, and the width of the hidden layers.
+	
+	
+	%\subsubsection*{Support Vector Machines}
+	\textbf{Support Vector Machines}
+	We only used a linear kernel, but the learning time of the SVM was so high, that we quickly decided not to investigate this approach further.
+	
+%	\subsubsection*{Random Forests}
+	\textbf{Random Forests}
+	\hl{The random forest classifier also didn't get good results on the small feature set, we have not YET tested it on the big feature set).}
 	
 	\section{Neural Networks}
 	
@@ -83,19 +109,17 @@
 	
 
 	
-	\section{Validation}
-	
+	\section{Data Validation}
+	\hl{DO we want to do something in this chapter? It is something we struugled with in the beginning? Maybe it can be merged with the next steps chapter?}
 	
 	\section{Next Steps}
-	After the first competition, we have already learned many things. 
+	After the first competition, we have already learned many things. In this section we will briefly discuss a few things that we want to do differently than we did in the first competition.
 	
-	\subsection{Data handling}
+	\textbf{Ensemble Methods} During the first competition, we found out that ensemble models are extremely powerful for machine learning tasks (e.g. during the project presentations some groups used these). We have decided that we also want to use ensemble methods in the next competition.
 	
-	\subsection{Ensemble}
+	\textbf{Collaboration} Our group was a bit slow in the beginning, so unfortunately we wasted a lot of time. Even later on, it was not clear for everyone what could and what should be done. That is why we have decided that a clear division of tasks, in smaller groups, will be beneficial to our results. We will also try to meet once a week.
 	
-	\subsection{Division of tasks}
-	
-	
+	Finally, we will try to utilize an existing git strategy, such as git flow. Now we are not using any strategy and everyone is committing to the master branch, but this leads to unnecessary conflicts and has a high chance of making merge mistakes.
 	\begin{thebibliography}{xx}
 		\bibitem{abc}
 		\textsc{Jagan}, \textit{Stop the S@\#\$ - Toxic Comments EDA},
