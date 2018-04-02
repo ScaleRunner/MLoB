@@ -78,7 +78,6 @@ def main(train_files='gs://mlip-test/processed_train_1000_data.json', job_dir='g
 
     print("average auc score", score_function(y_test, predications))
 
-
     # Save model
     # Save the model locally
     network.save('model.h5')
