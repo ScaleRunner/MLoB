@@ -18,19 +18,19 @@
 \maketitle
 
 \section{Introduction}
-This document describes a tutorial which can be used for connecting with GCP (Google Cloud Platform) and sending training jobs to Cloud ML. The folder with name 'templates' contains several templates which this document will refer to and which can be used to train models on Cloud ML. 
+This document describes a tutorial which can be used for connecting with GCP (Google Cloud Platform) and sending training jobs to Cloud ML. The folder with name 'templates' contains several templates. You can use these templates to train your models on Cloud ML. 
 \\
 \\
-\textit{Note: }This tutorial assumes that you're using Keras to train your models. This tutorial wasn't tested with any other packages.
+\textit{Note: }This tutorial assumes that you're using Keras to train your models. If you're using a different package, then you'll have to change the template 'train.py'.
 
 \section{GCP setup}
-As a preparation the TA's have created several containers\footnote{Basically a folder which can be assigned to specific users. This makes it possible to assign a container to each specific group. These folders/containers are used as a mechanism to save your data files and resulting models.} on GCP.
+As a preparation the TA's have created several containers\footnote{Basically a folder which can be assigned to specific users. This makes it possible to assign a container to each specific group. These folders/containers are used as a mechanism to save your data files and resulting models.} on GCP. The TA's have assigned a container to each group.
 \\
 \\
-To work with GCP you'll need to install their SDK. Google offers a \hyperlink{https://cloud.google.com/sdk/docs/}{tutorial} for this. During this tutorial you'll be prompted to select a project for which you need to select 'Pilot project 1'.
+To work with GCP you'll need to install their SDK (use the following \hyperlink{https://cloud.google.com/sdk/docs/}{\textit{tutorial}}). This tutorial will prompt you to select a project for which you'll have to select 'Pilot project 1'.
 
 \section{Upload training data}
-To train a model you first need to send your training data to GCP, you can use the following (terminal) command to achieve this:
+To train your model, you first have to send your training data to GCP. Use the following (terminal) command to send your training data to your container:
 
 \begin{lstlisting}[language=Bash]
 gsutil cp -r path_to_data_file/data_file.extension \
@@ -40,7 +40,7 @@ gs://container_name/data_file.extension
 \pagebreak
 
 \section{Folder structure and templates}
-To train your model on GCP the following folder structure is advised (see Figure \ref{fig:fsgcp}).
+Use the following folder structure for training your model on GCP:
 \begin{figure}[H]
 \dirtree{%
 .1 root.
@@ -53,20 +53,21 @@ To train your model on GCP the following folder structure is advised (see Figure
 \caption{Folder structure GCP}
 \label{fig:fsgcp}
 \end{figure}
-The file '\_\_init\_\_.py' is an initialization file which needs to be created and can be left empty.
+\subsection{Use cases files}
+The file '\_\_init\_\_.py' is an empty initialization file.
 \\
 \\
-The file 'train.py' is a template which can be used to combine your model with the structure needed to use GCP. The remainder of this tutorial assumes that you've merged your model with this file.
+The file 'train.py' is a template which can be used to combine your model with the structure needed to use GCP. The remainder of this tutorial assumes that you're using this template.
 \\
 \\
-The file 'cloud-gpu.yaml' is a file which can be used to adjust the amount of GPU's one wants to use. 
+The file 'cloud-gpu.yaml' is a file which can be used to adjust the amount of GPU's you want to use. 
 \\
 \\
-The file 'setup.py' is a file that GCP uses to check which packages you want to use. Make sure to add all packages (excluding the standard Python packages) to this file.
+The file 'setup.py' is a file that GCP uses to check which packages you want to use. Make sure to add all packages that you're using (excluding the standard Python packages) to this file.
 
 \subsection{Training your model}
 \subsection{Local}
-Training your model locally with a small dataset is wise as it allows you to test if your model is working after amending the changes which are described above. To test your model locally, use the following command:
+Training your model locally with a small dataset is wise as it allows you to test your model after amending the changes which are described above. To test your model locally, use the following command:
 
 \begin{lstlisting}[language=Bash]
 gcloud ml-engine local train --module-name trainer.train \ 
@@ -77,7 +78,7 @@ gcloud ml-engine local train --module-name trainer.train \
 
 
 \subsection{Cloud}
-Now that you've tested your model locally and thus know that if a bug occurs it's not your model, you can safely train your model using GCP. Using a unique job name at every run and using the right region (which can be found at your container page on GCP0, you can train your model on GCP using the following command:
+To test your model in the cloud use the following command, where the job name needs to be unique and where the region should correspond to the region of your container (region can be found at your container page on GCP):
 \begin{lstlisting}[language=Bash]
 gcloud ml-engine jobs submit training job_name --stream-logs \
 --runtime-version 1.4 --job-dir gs://container_name/job_name \
@@ -85,7 +86,10 @@ gcloud ml-engine jobs submit training job_name --stream-logs \
 --region region_name -- \
 --train-files gs://container_name/data_file.extension
 \end{lstlisting}
-After training your model you can use it to make predictions. You'll have to make these predictions locally and to download the resulting model you can use the following command:
+During training you can look into the progress of your model by navigating to the 'Logging' page at your GCP console. Make sure to apply a correct filter so that you only see logging data from the current job.
+\\
+\\
+After training, you can use your model to make predictions. You'll have to download your model first and then make the predictions locally. Use the following command to download your model:
 \begin{lstlisting}[language=Bash]
 gsutil cp gs://container_name/job_name/model.h5 folder_to_download_to/
 \end{lstlisting}
