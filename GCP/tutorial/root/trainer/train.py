@@ -17,7 +17,7 @@ import json
 from tensorflow.python.lib.io import file_io
 
 
-def load_data(path='gs://mlip-bucket/data/train.json'):
+def load_data(path):
     """
     Loading the data and turning it into a pandas dataframe
     :param path: Path to datafile; Can be predefined as shown above.
@@ -60,7 +60,7 @@ def create_model():
     return model
 
 
-def main(train_file, test_file, job_dir='gs://mlip-test/mlip-test15', **args):
+def main(train_file, test_file, job_dir):
     df = load_data(train_file)
 
     X_train, X_validation, y_train, y_validation = train_test_split_pandas(df)
@@ -90,12 +90,20 @@ if __name__ == '__main__':
     The argparser can also be extended to take --n-epochs or --batch-size arguments
     """
     parser = argparse.ArgumentParser()
+    
     # Input Arguments
     parser.add_argument(
-      '--train-files',
+      '--train-file',
       help='GCS or local paths to training data',
       required=True
     )
+
+    parser.add_argument(
+      '--test-file',
+      help='GCS or local paths to test data',
+      required=True
+    )
+
     parser.add_argument(
         '--job-dir',
         help='GCS location to write checkpoints and export models',
@@ -105,4 +113,4 @@ if __name__ == '__main__':
     arguments = args.__dict__
     print('args: {}'.format(arguments))
 
-    main(**arguments)
+    main(args.train_file, args.test_file, args.job_dir)
