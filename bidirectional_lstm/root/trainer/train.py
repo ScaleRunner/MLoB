@@ -84,7 +84,7 @@ def main(train_file, test_file, job_dir):
 
     model = create_model()
     batch_size = 32
-    epochs = 10
+    epochs = 1
 
     list_sentences_train = train["comment_text"].fillna("MLoB").values
     list_classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
@@ -101,13 +101,9 @@ def main(train_file, test_file, job_dir):
     file_path="./weights_base.best.hdf5"
     checkpoint = ModelCheckpoint(file_path, monitor='val_loss', verbose=1, save_best_only=True, 	mode='min')
     early = EarlyStopping(monitor="val_loss", mode="min", patience=20)
-    callbacks_list = [checkpoint, early] #early
+    callbacks_list = [checkpoint, early]
 
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1, 	  		callbacks=callbacks_list)
-
-    score, accuracy = model.evaluate(X_validation, y_validation)
-    print('Test score:', score)
-    print('Test accuracy:', accuracy)
 
     predictions = model.predict(X_test)
     # TODO: Kaggle competitions accept different submission formats, so saving the predictions is 		up to you
@@ -119,13 +115,11 @@ def main(train_file, test_file, job_dir):
         with file_io.FileIO(job_dir + '/model.h5', mode='w+') as output_f:
             output_f.write(input_f.read())
 
-    # Predict
-    np.savetxt("../predictions.csv", predictions, delimiter=',')
-
-    with file_io.FileIO('predictions.csv', mode='w+') as f:
-        f.write("id,toxic,severe_toxic,obscene,threat,insult,identity_hate\n")
-        for i, preds in enumerate(predictions):
-            f.write("{},{},{},{},{},{}\n".format(*preds))
+    # Save predictions.
+    np.savetxt("predictions.csv", predictions, delimiter=',')
+    with file_io.FileIO('predictions.csv', mode='r') as input_f:
+        with file_io.FileIO(job_dir + '/predictions.csv', mode='w+') as output_f:
+            output_f.write(input_f.read())
 
 
 if __name__ == '__main__':
