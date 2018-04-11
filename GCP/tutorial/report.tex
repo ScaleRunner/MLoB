@@ -54,8 +54,7 @@ Use the following folder structure for training your model on GCP:
 .2 trainer.
 .3 \_\_init\_\_.py.
 .3 train.py.
-.3 cloudml-gpu.yaml.
-.2 \_\_init\_\_.py.
+.3 config.yaml.
 .2 setup.py.
 }
 \caption{Folder structure GCP}
@@ -68,7 +67,7 @@ The file \texttt{\_\_init\_\_.py} is an empty initialization file.
 The file \texttt{train.py} is a template which can be used to combine your model with the structure needed to use GCP. The remainder of this tutorial assumes that you're using this template.
 \\
 \\
-The file \texttt{cloud-gpu.yaml} is a file which can be used to adjust the amount of GPU's you want to use. 
+The file \texttt{config.yaml} is a file which can be used to adjust the amount of GPU's you want to use during training. 
 \\
 \\
 The file \texttt{setup.py} is a file that GCP uses to check which packages you want to use. Make sure to add all packages that you're using (excluding the standard Python packages) to this file.
@@ -91,7 +90,8 @@ To test your model in the cloud use the following command, where the job name ne
 gcloud ml-engine jobs submit training job_name --stream-logs \
 --runtime-version 1.4 --job-dir gs://container_name/job_name \
 --package-path path_to_root/trainer --module-name trainer.train \
---region region_name -- \
+--region region_name  --config path_to_root/trainer/config.yaml \
+-- \
 --train-file gs://container_name/data_file.extension
 \end{verbatim}
 After the `empty' parameter (\texttt{--}), you may add your own parameters that can be passed to the trainer. \\
