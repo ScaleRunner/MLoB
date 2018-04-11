@@ -80,7 +80,7 @@ Training your model locally with a small dataset is wise as it allows you to tes
 \begin{verbatim}
 gcloud ml-engine local train --module-name trainer.train \ 
 --package-path path_to_root/trainer -- \
---train-file path_to_local_train_file/train_file.extension \
+--train-files path_to_local_train_file/train_file.extension \
 --job-dir ./tmp/test_script_gcp
 \end{verbatim}
 
@@ -90,11 +90,11 @@ To test your model in the cloud use the following command, where the job name ne
 \begin{verbatim}
 gcloud ml-engine jobs submit training job_name --stream-logs \
 --runtime-version 1.4 --job-dir gs://container_name/job_name \
---package-path path_to_root/trainer --module-name train.py \
+--package-path path_to_root/trainer --module-name trainer.train \
 --region region_name -- \
 --train-files gs://container_name/data_file.extension
 \end{verbatim}
-After the `empty' parameter (\texttt{--}), go your own parameters that will be passed to the trainer. \\
+After the `empty' parameter (\texttt{--}), you may add your own parameters that can be passed to the trainer. \\
 \\
 During training you can look monitor the progress of your model by navigating to the 'Logging' page at your GCP console. Make sure to apply a correct filter so that you only see logging data from the current job.
 \\
