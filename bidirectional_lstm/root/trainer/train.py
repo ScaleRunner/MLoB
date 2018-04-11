@@ -9,6 +9,7 @@ import pandas as pd
 from keras.models import Model
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, LSTM, Input, Bidirectional, GlobalMaxPool1D, Dropout
+from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from keras.preprocessing import sequence
 from keras.preprocessing import text, sequence
@@ -46,10 +47,9 @@ def load_data(path):
     :return: pandas dataframe
     """
 
-    data = pd.read_csv(path)
+    with file_io.FileIO(path, 'r') as f:
+        data = pd.read_csv(f)
     return data
-
-
 
 def create_model():
     """
@@ -58,20 +58,20 @@ def create_model():
     not have the exact same architecture.
     :return:
     """
-    embed_size = 512
+    embed_size = 256
     inp = Input(shape=(maxlen, ))
     x = Embedding(max_features, embed_size)(inp)
-    x = Bidirectional(LSTM(1024, return_sequences=True))(x)
+    x = Bidirectional(LSTM(128, return_sequences=True))(x)
     x = GlobalMaxPool1D()(x)
     x = Dropout(0.1)(x)
-    x = Dense(100, activation="relu")(x)
+    x = Dense(50, activation="relu")(x)
     x = Dropout(0.1)(x)
     x = Dense(6, activation="sigmoid")(x)
     model = Model(inputs=inp, outputs=x)
+    optimizer = Adam(lr=1e-7)
     model.compile(loss='binary_crossentropy',
-                  optimizer='adam',
-                  metrics=['accuracy'])
-
+                  metrics=['accuracy'],
+                  optimizer=optimizer)
     model.summary()
 
     return model
@@ -84,13 +84,12 @@ def main(train_file, test_file, job_dir):
 
     model = create_model()
     batch_size = 32
-    epochs = 25
+    epochs = 10
 
     list_sentences_train = train["comment_text"].fillna("MLoB").values
     list_classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
     y_train = train[list_classes].values
     list_sentences_test = test["comment_text"].fillna("MLoB").values
-
 
     tokenizer = text.Tokenizer(num_words=max_features)
     tokenizer.fit_on_texts(list(list_sentences_train))
@@ -104,14 +103,11 @@ def main(train_file, test_file, job_dir):
     early = EarlyStopping(monitor="val_loss", mode="min", patience=20)
     callbacks_list = [checkpoint, early] #early
 
-
     model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1, 	  		callbacks=callbacks_list)
 
     score, accuracy = model.evaluate(X_validation, y_validation)
     print('Test score:', score)
     print('Test accuracy:', accuracy)
-
-
 
     predictions = model.predict(X_test)
     # TODO: Kaggle competitions accept different submission formats, so saving the predictions is 		up to you
@@ -122,6 +118,14 @@ def main(train_file, test_file, job_dir):
     with file_io.FileIO('model.h5', mode='r') as input_f:
         with file_io.FileIO(job_dir + '/model.h5', mode='w+') as output_f:
             output_f.write(input_f.read())
+
+    # Predict
+    np.savetxt("../predictions.csv", predictions, delimiter=',')
+
+    with file_io.FileIO('predictions.csv', mode='w+') as f:
+        f.write("id,toxic,severe_toxic,obscene,threat,insult,identity_hate\n")
+        for i, preds in enumerate(predictions):
+            f.write("{},{},{},{},{},{}\n".format(*preds))
 
 
 if __name__ == '__main__':
