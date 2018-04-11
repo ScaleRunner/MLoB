@@ -80,7 +80,7 @@ Training your model locally with a small dataset is wise as it allows you to tes
 \begin{verbatim}
 gcloud ml-engine local train --module-name trainer.train \ 
 --package-path path_to_root/trainer -- \
---train-file path_to_local_train_file/train_file.extension \
+--train-files path_to_local_train_file/train_file.extension \
 --job-dir ./tmp/test_script_gcp
 \end{verbatim}
 
