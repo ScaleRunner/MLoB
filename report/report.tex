@@ -88,6 +88,10 @@
 	\textbf{Random Forests}
 	\hl{The random forest classifier also didn't get good results on the small feature set, we have not YET tested it on the big feature set).}
 	
+% \subsubsection*{1D Convolutional Network}
+    \textbf{1D Convolutional Network}
+    Another approach we tried is the 1-dimensional convolutional network. However, because this network showed weak results (merely 0.4902 ROC AUC score) we decided to drop this approach.
+
 	\section{Neural Networks}
 	
 	Having implemented these feature based approaches, we decided it might be better to use a neural network model. We decided to use the LSTM (Long Short Term Memory), because LSTM's are recurrent neural networks, so it can learn the context of words in sentences. First we tried to use the most simple LSTM we could think of.
