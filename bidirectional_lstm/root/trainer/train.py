@@ -58,10 +58,10 @@ def create_model():
     not have the exact same architecture.
     :return:
     """
-    embed_size = 256
+    embed_size = 128
     inp = Input(shape=(maxlen, ))
     x = Embedding(max_features, embed_size)(inp)
-    x = Bidirectional(LSTM(128, return_sequences=True))(x)
+    x = Bidirectional(LSTM(256, return_sequences=True))(x)
     x = GlobalMaxPool1D()(x)
     x = Dropout(0.1)(x)
     x = Dense(50, activation="relu")(x)
@@ -84,7 +84,7 @@ def main(train_file, test_file, job_dir):
 
     model = create_model()
     batch_size = 32
-    epochs = 1
+    epochs = 10
 
     list_sentences_train = train["comment_text"].fillna("MLoB").values
     list_classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
@@ -107,10 +107,9 @@ def main(train_file, test_file, job_dir):
 
     predictions = model.predict(X_test)
     # TODO: Kaggle competitions accept different submission formats, so saving the predictions is 		up to you
-    # Save model weights
-    model.save('model.h5')
 
     # Save model on google storage
+    model.save('model.h5')
     with file_io.FileIO('model.h5', mode='r') as input_f:
         with file_io.FileIO(job_dir + '/model.h5', mode='w+') as output_f:
             output_f.write(input_f.read())
