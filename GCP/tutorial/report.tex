@@ -12,36 +12,41 @@
 
 \graphicspath{ {images/} }
 
+\title{}
 \title{Training ML models using GCP}
-\author{Mick van Hulst \and Dennis Verheijden}
+\author{Team MLoB}
 \begin{document}
 \maketitle
 
 \section{Introduction}
-This document describes a tutorial which can be used for connecting with GCP (Google Cloud Platform) and sending training jobs to Cloud ML. The folder with name 'templates' contains several templates. You can use these templates to train your models on Cloud ML. 
+This guide can be used for connecting with GCP (Google Cloud Platform) and for training your ML models using Cloud ML. We've added a folder with name 'root' which contains several files which you can use to train your models. This guide assumes that you're using Keras, so if you're using PyTorch or any other package, then you'll have to alter the contents of the mentioned folder.
 \\
 \\
-\textit{Note: }This tutorial assumes that you're using Keras to train your models. If you're using a different package, then you'll have to change the template 'train.py'.
+There's a (big) chance that the tutorial is not explanatory enough. If you're in need of assistance or have any questions, then feel free to contact us (please try Google first as Google knows everything):
+\begin{itemize}
+	\item \textbf{Mick van Hulst:} J.vanHulst@student.ru.nl 
+	\item \textbf{Dennis verheijden:} d.verheijden@student.ru.nl
+\end{itemize}
 
 \section{GCP setup}
-As a preparation the TA's have created several containers\footnote{Basically a folder which can be assigned to specific users. This makes it possible to assign a container to each specific group. These folders/containers are used as a mechanism to save your data files and resulting models.} on GCP. The TA's have assigned a container to each group.
+As a preparation the TA's have created several buckets\footnote{Basically a folder which can be assigned to specific users. This makes it possible to assign a bucket to each specific group. These folders/buckets are used as a mechanism to save your data files and resulting models.} on GCP. The TA's have assigned a bucket to each group.
 \\
 \\
-To work with GCP you'll need to install their SDK (using the following \hyperlink{https://cloud.google.com/sdk/docs/}{tutorial}). This tutorial will prompt you to select a project for which you'll have to select 'Pilot project 1'.
+To work with GCP you'll need to install their SDK (using the following \textit{\href{https://cloud.google.com/sdk/docs/}{tutorial}}). This tutorial will prompt you to select a project for which you'll have to select 'Pilot project 1'.
 
 \section{Upload training data}
 To train your model, you first have to send your training data to GCP. This can be done in a number of ways, most people will probably want to send a folder (with train, test and maybe validation data). This can be done using the following (terminal) command:
 
 \begin{verbatim}
-gsutil cp -r data_dir gs://container_name
+gsutil cp -r data_dir gs://bucket_name
 \end{verbatim}
 
-Where \texttt{data\_dir} is the local directory where the files are stored. You can also specify where the files have to be saved, by adjusting the destination url, for example to: \texttt{gs://container\_name/data}.
+Where \texttt{data\_dir} is the local directory where the files are stored. You can also specify where the files have to be saved, by adjusting the destination url, for example to: \texttt{gs://bucket\_name/data}.
 
 For copying separate files you can remove the \texttt{-r} (recursive) parameter and specify file source and destination:
 \begin{verbatim}
 gsutil cp -r local_path_to_file/file.extension \
-gs://container_name/file.extension
+gs://bucket_name/file.extension
 \end{verbatim}
 
 Downloading data can be done by switching the \textbf{gs://url} with the local folder.
@@ -85,24 +90,23 @@ gcloud ml-engine local train --module-name trainer.train \
 
 
 \subsection{Cloud}
-To test your model in the cloud use the following command, where the job name needs to be unique and where the region should correspond to the region of your container (region can be found at your container page on GCP):
+To test your model in the cloud use the following command, where the job name needs to be unique and where the region should correspond to the region of your bucket (region can be found in your bucket list on GCP):
 \begin{verbatim}
 gcloud ml-engine jobs submit training job_name --stream-logs \
---runtime-version 1.4 --job-dir gs://container_name/job_name \
+--runtime-version 1.4 --job-dir gs://bucket_name/job_name \
 --package-path path_to_root/trainer --module-name trainer.train \
 --region region_name  --config path_to_root/trainer/config.yaml \
 -- \
---train-file gs://container_name/data_file.extension
+--train-file gs://bucket_name/data_file.extension
 \end{verbatim}
 After the `empty' parameter (\texttt{--}), you may add your own parameters that can be passed to the trainer. \\
 \\
-During training you can look monitor the progress of your model by navigating to the 'Logging' page at your GCP console. Make sure to apply a correct filter so that you only see logging data from the current job.
+During training you can look monitor the progress of your model by going to the logging page on GCP. Make sure to apply a correct filter so that you only see logging data from the current job.
 \\
 \\
 After training, you can use your model to make predictions. You'll have to download your model first and then make the predictions locally. Use the following command to download your model:
 \begin{verbatim}
-gsutil cp gs://container_name/job_name/model.h5 local_folder/
+gsutil cp gs://bucket_name/job_name/model.h5 local_folder/
 \end{verbatim}
-
 \end{document}
 
