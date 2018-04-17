@@ -41,10 +41,14 @@ def load_data(df, test_split=.3):
 def create_1D_conv(longest_sentence, output_size):
     model = Sequential()
     model.add(Embedding(input_dim=longest_sentence, output_dim=2))
-    model.add(Conv1D(512, 5, activation='relu'))
+    model.add(Conv1D(512, 50, activation='relu'))
     model.add(MaxPooling1D())
-    model.add(Conv1D(512, 3, activation='relu'))
+    model.add(Conv1D(256, 25, activation='relu'))
     model.add(MaxPooling1D())
+    model.add(Conv1D(128, 13, activation='relu'))
+    model.add(MaxPooling1D())
+    # model.add(Conv1D(512, 5, activation='relu'))
+    # model.add(MaxPooling1D())
     model.add(GlobalAveragePooling1D())
     model.add(Dropout(0.5))
     model.add(Dense(output_size, activation='softmax'))
@@ -108,7 +112,7 @@ def main():
     sample_submission[list_classes] = y_test
     print(sample_submission)
 
-    sample_submission.to_csv("conv1d_prediction.csv", index=False)
+    sample_submission.to_csv("conv1d_2_prediction.csv", index=False)
 
 
 if __name__ == "__main__":
