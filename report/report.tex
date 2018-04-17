@@ -76,11 +76,11 @@
 				\toprule
 				\textbf{Method} & \textbf{AUC} \\
 				\midrule
-				Feature Based Approach v1 & 0.59 ??  \\
-				Feature Based Approach v2 & 0.52 \\
+				Feature Based Approach v1 & 0.60   \\
+				Feature Based Approach v2 & 0.53 \\
 				Convolutional Neural Network & 0.4902 \\
-				Vanilla LSTM & 0.51 \\
-				Biirectional LSTM & 0.96 \\
+				Vanilla LSTM & 0.52 \\
+				Bidirectional LSTM & 0.9256 \\
 				\bottomrule
 			\end{tabular}
 			\caption{Summary of the achieved results, the Area Under the Curve (AUC) are computed using Kaggle.}
@@ -114,7 +114,7 @@
 		
 		\begin{itemize}
 			\item For a list of swear words (since we are doing \emph{toxic} comment classification), we added a feature denoting whether that particular word occurred in the comment. This list concluded a list of common abuse and spam words, as well as common function words.
-			\item  POS tags.
+			\item  A word-2-vec score per comment is calculated by taking the average word2vec scores of every word in the sentence, normalised by the tf-idf score of each word.
 		\end{itemize}
 		
 		These features increased features from 10 to 80+ but only gave a marginal improvement to the mean-averaged area under the curve (AUC) score.
@@ -142,7 +142,7 @@
 		
 		\subsection{Neural Networks}
 		
-		After a small literature study we found a LSTM (Long Short Term Memory) to be the appropriate method in terms of a neural network approach. Because LSTM's are recurrent neural networks, it can learn temporal information, or the context of words in sentences. First we implemented a basic LSTM with a custom reverse dictionary. \textbf{TO ADD: For the LSTM algorithm we first tried focusing on a top n percentage of common words as we thought that some very common words might be influencing the model too much. However, after testing it on the training set, we noticed that the LSTM performed better when using all of the words. And as such, we abandoned this method.}
+		After a small literature study we found a LSTM (Long Short Term Memory) to be the appropriate method in terms of a neural network approach. Because LSTM's are recurrent neural networks, it can learn temporal information, or the context of words in sentences. First we implemented a basic LSTM with a custom reverse dictionary. For this LSTM algorithm we first tried focusing on a top n percentage of common words as we thought that very common words might be influencing the model too much. However, after testing it on the training set, we noticed that the LSTM performed better when using all of the words. And as such, we abandoned this method.
 		
 		After that, we found a Kaggle kernel for a bidirectional LSTM. This means that we feed the sentence twice to the LSTM, once normally, from front to back, and once flipped. This mode performed better than aforementioned models, so we continued optimizing it.
 		
