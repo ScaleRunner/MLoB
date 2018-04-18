@@ -11,7 +11,13 @@
 \usepackage[normalem]{ulem}
 \usepackage{cite}
 
-
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
 
 % Forcequit autonumbering
 \pagenumbering{gobble}
@@ -38,33 +44,32 @@
 	\begin{multicols}{2}
 	
 	    \section{Introduction}
-	    This report describes the results for the first competition of the course Machine Learning in Practice. The source code for this project can be found by going to the public Github \footnote{https://github.com/ScaleRunner/MLoB\#challenge}
+	    This report describes the results for the first competition of the course Machine Learning in Practice. The source code for this project can be found by going to \href{https://github.com/ScaleRunner/MLoB\#challenge}{the public Github repository}.
 	    \\
 	    \\
 	    During the project each of the team members were assigned specific tasks. Do take note that our approach can be considered agile as we switched roles constantly and helped each other out where we could:
 	    \begin{itemize}
 	        \item \textbf{Mick van Hulst:} Focused on the preprocessing of the data, setting up the (GCP) Google Cloud Platform environment and the final report
-	        \item \textbf{Dennis Verheijen:} Focused on feature extraction and making the code format files for GCP.
+	        \item \textbf{Dennis Verheijen:} Focused on feature extraction, writing training routines, processing predictions for kaggle, making the code format files for GCP and helped in the report for GCP and for the competition.
 	        \item \textbf{Roel van der Burg:} Focused on developing the LSTM, bidirectional LSTM network and the final report
 	        \item \textbf{Brian Weserweel:} Focused on developing the LSTM network and the CNN.
 	        \item \textbf{Joost Besseling:} Focused on developing the bidirectional LSTM and writing the report.
 	    \end{itemize}
 		
 		\section{Problem statement}
-		We have chosen the toxic comment classification challenge on Kaggle. This challenge consisted of a dataset of around $\sim$160 thousand wikipedia comments which had to be classified given six different classes. These classes regard the level of abuse in each comment. Moreover, the classes are not mutually exclusive, which means our problem is a multilabel classification problem.
+		We have chosen \href{https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/}{the toxic comment classification challenge} on Kaggle. This challenge consisted of a dataset of roughly 160 thousand Wikipedia comments which had to be classified given six different classes. The classes are various types of toxicity: \texttt{toxic}, \texttt{severe\_toxic}, \texttt{obscene}, \texttt{threat}, \texttt{insult}, \texttt{identity\_hate}. Moreover, these classes are not mutually exclusive, which means that our problem is a multi-label classification problem.
 		
 		\section{Dataset}
-		Both the training and test set provided by Kaggle consist of about 160 thousand comments, a comment id and for the training set the respective class labels.
+		The training and test set, provided by Kaggle, consists of roughly 160 thousand entries. Each entry has a comment id, the comment and, for the training set, the respective class labels.
 		\\
 		\\
-		One important characteristic of our data is that the set is very imbalanced (figure \ref{fig:data_dist}). This posed many challenges to us.
 		\begin{figure}[H]
             \centering
             \includegraphics[scale=.4]{img/distribution_histogram.png}
             \caption{Data distribution}
             \label{fig:data_dist}
         \end{figure}
-	    Over 96 percent of the dataset was clean and thus did not have any label. This made it hard to train the models to recognise the toxic comments. During the project we thought of training several classifiers for each class, or equivalently having a classifier to first distinguish between toxic and non-toxic comments, and thereafter use a second classifier to classify the toxic comments. However, due to time constraints we could not pursue these options.
+        One important characteristic of our data is that the set is very imbalanced (figure \ref{fig:data_dist}). This posed many challenges. Over 96 percent of the dataset was clean and thus did not have any label. This made it difficult to train models to classify comments as toxic, opposed to classifying all samples as clean. During the project we thought of training several classifiers for each class, or equivalently having a classifier to first distinguish between toxic and non-toxic comments, and thereafter use a second classifier to classify the toxic comments. However, due to time constraints we could not pursue these options.
 	    \\
 	    \\
 	    To give the reader an example of the dataset, we've included the following comment that is classified as toxic, obscene and as an insult:
@@ -73,7 +78,7 @@
         \textit{'Groin You sad fuck. I'm going to restore my edit, and you are going to leave it, or else I wil knee you in the groin yourself, prick. 91.108.208.101'}
 	
 		\subsection*{Data Preprocessing}
-		The data consists of raw Wikipedia comments, so some pre-processing is necessary before using them for training purposes. These preprocessing steps include tokenizing sentences and subsequently converting individual words to lowercase. We decided not to correct misspelled words as this can for example be used for hand-crafted features. 
+		The data consists of raw Wikipedia comments, so some pre-processing is necessary before using them for training purposes. These preprocessing steps include tokenizing sentences and subsequently converting individual words to lowercase. We decided not to correct misspelled words as these mistakes themselves may be a sign of toxicity. This, for example, can be used for creating hand-crafted features. 
 		
 		\begin{table*}[t]
 			\centering
@@ -88,7 +93,7 @@
 				Bidirectional LSTM & 0.93 \\
 				\bottomrule
 			\end{tabular}
-			\caption{Summary of the achieved results, the Area Under the Curve (AUC) are computed using Kaggle.}
+			\caption{Summary of the achieved results, the Area Under the Curve (AUC) scores are computed using Kaggle.}
 			\label{table:summary_results}
 		\end{table*}
 		
@@ -121,7 +126,7 @@
 			\item For a list of swear words (since we are doing \emph{toxic} comment classification), we added a feature denoting whether that particular word occurred in the comment. This list included a list of common abuse and spam words, as well as common function words.
 			\item  A sentence2vec score comment is calculated by taking the average word2vec scores of every word in the sentence, normalised by the tf-idf score of each word.
 		\end{itemize}
-		These features increased count from 10 to 80+ but only gave a marginal improvement to the mean-averaged area under the curve (AUC) score.
+		These features increased count from 10 to 80+ but only gave a marginal improvement to the mean-averaged area under the curve (AUC) score, as may be observed in the results (table \ref{table:summary_results}).
 		
 		\subsubsection{Feature-based Classifiers}
 		\label{sec:classifiers}
@@ -142,33 +147,35 @@
 		From literature we found convolutional networks to be a good choice for these type of tasks. since the convolutions in essence 
 		\\
 		\\
-		Another approach we tried is the 1-dimensional convolutional network. However, because this network showed weak results (merely 0.4902 ROC AUC score) we decided to drop this approach.
+		Another approach we tried is the 1-dimensional convolutional network. However, because this network showed weak results (merely 0.4902 ROC AUC score), so we decided to drop this approach.
 		
 		\subsection{Neural Networks}
 		
-		After a small literature study we found a LSTM (Long Short Term Memory) to be the appropriate method in terms of a neural network approach. Because LSTM's are recurrent neural networks, it can learn temporal information, or the context of words in sentences. First we implemented a basic LSTM with a custom reverse dictionary. For this LSTM algorithm we first tried focusing on a top n percentage of common words as we thought that very common words might be influencing the model too much. However, after testing it on the training set, we noticed that the LSTM performed better when using all of the words. And as such, we abandoned this method.
+		After a small literature study we found a LSTM (Long Short Term Memory) to be the, theoretical, optimal method in terms of neural network approaches. Because LSTM's are recurrent neural networks, they can learn temporal information, such as context of words in sentences \cite{zhou2016text}. First, we implemented a basic LSTM with a custom reverse dictionary. For this approach, we first tried focusing on the top $n$ percentage of common words, as we thought that common words would carry the most information about the content of the comment and as a way the limit the computational complexity. However, after testing on the training set, we noticed that the LSTM performed better when using all of the words. And as such, we abandoned this method.
 		\\
 		\\
-		After testing the regular LSTM network, we found literature about a bidirectional LSTM \cite{zhou2016text}. A bidirectional LSTM feeds the sentence twice tot he LSTM, once normally, from front to back, and once flipped. This model performed better than aforementioned models, so we continued optimizing it.
+		After testing the regular LSTM network, we found literature about a bidirectional LSTM \cite{zhou2016text}. A bidirectional LSTM feeds the sentence twice to the LSTM, once from front to back, and once mirrored (figure \ref{fig:example_input}). This model performed better than aforementioned models (table \ref{table:summary_results}), so we continued optimizing it.
 		
 		% TODO plaatje van de Bidirect lstm
-		\begin{figure}
+		\begin{figure}[H]
+		\centering
 			\begin{verbatim}	
-			A forward and backwardsentence
+			A forward and backward sentence
 			sentence backward and forward A
 			\end{verbatim}
 			\caption{An example of how the  Bidirectional layer would feed the data to the LSTM}
+			\label{fig:example_input}
 		\end{figure}
 		\newpage
 		\begin{minipage}{\linewidth}
 		\section{Reflection}
 		This section briefly discusses some things that stood out during this project.
 		\subsection{Imbalanced dataset}
-		The one thing that stood out from our dataset is that it was very imbalanced. This made it hard to test if our model was performing correctly as predicting that every comment was non-toxic already resulted in an accuracy of $\approx 0.96$. This made it hard to train our models as during training time the model quickly returned a small loss.
+		The one thing that stood out from our dataset is that it was very imbalanced. This made it hard to test if our model was performing correctly as predicting that every comment was non-toxic already resulted in an accuracy of roughly $0.96$. This made it hard to train our models as during training time the model quickly returned a small loss.
     	\subsection{Ensemble methods}
-		During the first competition, we found out that ensemble models are extremely powerful for machine learning tasks (e.g. during the project presentations some groups used these). We have decided that we also want to use ensemble methods in the next competition. For this competition however, we did not have the correct models to have an efficient ensemble.
+		During the first competition, we found out that ensemble models are extremely powerful for machine learning tasks (during the project presentations, some groups also reported these findings). We have decided that we also want to use ensemble methods in the next competition. For this competition however, we did not have the correct models to have an efficient ensemble.
 		\subsection{Collaboration}
-		After this first project we are more accustomed to each of our group members (i.e. knowing each other's strengths/weaknesses). This makes it easier for us to work together and enables us to divide our tasks accordingly. To efficiently work together, we're going to utilize an existing git strategy, such as git flow. Also, we found great benefit in the weekly meetings and thus we're going to continue doing so.
+		After this first project we are more accustomed to each of our group members (i.e. knowing each other's strengths/weaknesses). This makes it easier for us to collaborate together and enables us to divide our tasks accordingly. To efficiently work together, we're going to utilize an existing git strategy, such as git flow. Also, we found great benefit in the weekly meetings and thus we're going to continue doing so.
 	    
 	\bibliographystyle{unsrt}
 	\bibliography{bib}
