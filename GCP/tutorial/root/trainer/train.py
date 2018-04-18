@@ -99,16 +99,11 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-      '--test-file',
-      help='GCS or local paths to test data',
-      required=True
-    )
-
-    parser.add_argument(
         '--job-dir',
         help='GCS location to write checkpoints and export models',
         required=True
     )
+    
     args = parser.parse_args()
     arguments = args.__dict__
     print('args: {}'.format(arguments))

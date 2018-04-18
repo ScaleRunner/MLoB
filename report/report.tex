@@ -5,9 +5,16 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{float}
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage[normalem]{ulem}
+\usepackage{cite}
+
+
+
+% Forcequit autonumbering
+\pagenumbering{gobble}
 
 
 %% Multicolumns
@@ -21,7 +28,7 @@
 
 \title{Toxic Comment Classification - Report}
 
-\author{Mick van Hulst \and Dennis Verheijen \and Roel van der burg \and Brian Westerweel \and Joost Besseling}
+\author{Mick van Hulst \and Dennis Verheijden \and Roel van der burg \and Brian Westerweel \and Joost Besseling}
 
 \begin{document}
 	\maketitle
@@ -29,46 +36,44 @@
 	
 	%% Start multicolumns
 	\begin{multicols}{2}
+	
+	    \section{Introduction}
+	    This report describes the results for the first competition of the course Machine Learning in Practice. The source code for this project can be found by going to the public Github \footnote{https://github.com/ScaleRunner/MLoB\#challenge}
+	    \\
+	    \\
+	    During the project each of the team members were assigned specific tasks. Do take note that our approach can be considered agile as we switched roles constantly and helped each other out where we could:
+	    \begin{itemize}
+	        \item \textbf{Mick van Hulst:} Focused on the preprocessing of the data, setting up the (GCP) Google Cloud Platform environment and the final report
+	        \item \textbf{Dennis Verheijen:} Focused on feature extraction and making the code format files for GCP.
+	        \item \textbf{Roel van der Burg:} Focused on developing the LSTM, bidirectional LSTM network and the final report
+	        \item \textbf{Brian Weserweel:} Focused on developing the LSTM network and the CNN.
+	        \item \textbf{Joost Besseling:} Focused on developing the bidirectional LSTM and writing the report.
+	    \end{itemize}
 		
 		\section{Problem statement}
-		We have chosen the toxic comment classification challenge on Kaggle. This challenge consisted of a dataset of around $\sim$160 thousand wikipedia edit comments which had to be classified given six different classes. These classes regard the level of abuse in each comment. Moreover, the classes are not mutually exclusive, which means our problem is a multilabel classification problem.
+		We have chosen the toxic comment classification challenge on Kaggle. This challenge consisted of a dataset of around $\sim$160 thousand wikipedia comments which had to be classified given six different classes. These classes regard the level of abuse in each comment. Moreover, the classes are not mutually exclusive, which means our problem is a multilabel classification problem.
 		
 		\section{Dataset}
-		
-		Both the training and test set provided by Kaggle consist of about 160 thousand comments, a comment id and for the training set, the respective class labels.
-		%TODO een voorbeeld sample
-		
-		One important characteristic of our data is that the set is very imbalanced (figure \ref{fig:imbalance}). This posed many challenges to us.
-		
-		
-		\begin{figure}[h]
-			\centering
-			\includegraphics[width=0.5\linewidth]{img/distribution_histogram.png}
-		\end{figure}
-		
-	\end{multicols}
+		Both the training and test set provided by Kaggle consist of about 160 thousand comments, a comment id and for the training set the respective class labels.
+		\\
+		\\
+		One important characteristic of our data is that the set is very imbalanced (figure \ref{fig:data_dist}). This posed many challenges to us.
+		\begin{figure}[H]
+            \centering
+            \includegraphics[scale=.4]{img/distribution_histogram.png}
+            \caption{Data distribution}
+            \label{fig:data_dist}
+        \end{figure}
+	    Over 96 percent of the dataset was clean and thus did not have any label. This made it hard to train the models to recognise the toxic comments. During the project we thought of training several classifiers for each class, or equivalently having a classifier to first distinguish between toxic and non-toxic comments, and thereafter use a second classifier to classify the toxic comments. However, due to time constraints we could not pursue these options.
+	    \\
+	    \\
+	    To give the reader an example of the dataset, we've included the following comment that is classified as toxic, obscene and as an insult:
+	    \\
+	    \\
+        \textit{'Groin You sad fuck. I'm going to restore my edit, and you are going to leave it, or else I wil knee you in the groin yourself, prick. 91.108.208.101'}
 	
-	
-	\begin{table}[]
-		\centering
-		\label{my-label}
-		\begin{tabular}{|l|l|}
-			\hline
-			\textbf{Tweet}                                                                                                                                         & \textbf{Class} \\ \hline
-			\begin{tabular}[c]{@{}l@{}}Who are you tomorrow? Will you make me smile or just\\ bring me sorrow? \#HottieOfTheWeek Demi Lovato\end{tabular} & 0,0,0,0,0,0   \\ \hline
-			\begin{tabular}[c]{@{}l@{}}The maestro ... the legend Roger Federer king of the backhand\\ game one of his best shots\end{tabular}            & 0,0,0,0,0,0  \\ \hline
-		\end{tabular}
-		\caption{Example Wikipedia edit comments from the Kaggle Toxic Comment classification challenge}
-	\end{table}
-	
-	
-	
-	%% Start multicolumns
-	\begin{multicols}{2}
-		
-		
 		\subsection*{Data Preprocessing}
-		The data consists of raw Wikipedia edit comments, so some pre-processing is necessary before using them for training purposes. These preprocessing steps include tokenizing sentences and subsequently converting individual words to lowercase and correct erroneously spelled words. Though  naturally, different algorithms might require different data. While misspelled words might not be good input for some neural networks, the occurrence of misspellings might be a good hand-crafted feature.
+		The data consists of raw Wikipedia comments, so some pre-processing is necessary before using them for training purposes. These preprocessing steps include tokenizing sentences and subsequently converting individual words to lowercase. We decided not to correct misspelled words as this can for example be used for hand-crafted features. 
 		
 		\begin{table*}[t]
 			\centering
@@ -77,7 +82,7 @@
 				\textbf{Method} & \textbf{AUC} \\
 				\midrule
 				Feature Based Approach v1 & 0.60   \\
-				Feature Based Approach v2 & 0.53 \\
+				Feature Based Approach v2 & 0.56 \\
 				Convolutional Neural Network & 0.49 \\
 				Vanilla LSTM & 0.52 \\
 				Bidirectional LSTM & 0.93 \\
@@ -89,10 +94,10 @@
 		
 		
 		\section{Models}
-		Several approaches were taken, starting with feature extraction, followed by Neural Network approaches including language modeling with an LSTM and a convolutional network.
+		Several approaches were taken, starting with feature extraction, followed by Neural Network approaches.
 		
 		\subsection{Feature Extraction}
-		Our first approach included mahual feature extraction. The features were handcrafted, such that they are tangible features (i.e. not generated by a Neural Network).
+		Our first approach included manual feature extraction. The features were handcrafted (i.e. not generated by a Neural Network).
 		\subsubsection{Feature Based Approach v1}
 		In the first iteration of this approach, more generic features were used:
 		\begin{itemize}
@@ -103,7 +108,7 @@
 			\item Total amount of some special characters: ?, (, ), ! and some other characters.
 			\item Ration and amounts of unique words		
 		\end{itemize}
-		In total, about ten features were generated. These features were used to train various classifiers, which will be described in section \ref{sec:classifiers}. Each model was evaluated separately. However, as may be noted from the results but in the end, none of these feature based models managed to produce convincing results.
+		In total, ten features were generated. These features were used to train various classifiers, which will be described in section \ref{sec:classifiers}. Each model was evaluated separately. However, as may be noted from the results but in the end, none of these feature based models managed to produce convincing results.
 		
 		
 		\subsubsection{Feature Based Approach v2}
@@ -113,38 +118,38 @@
 		Since we are trying to predict 6 classes separately, and we are using a  complex set, the dimensionality of the set is probably higher than 10. That is why we decided to introduce some extra features.
 		
 		\begin{itemize}
-			\item For a list of swear words (since we are doing \emph{toxic} comment classification), we added a feature denoting whether that particular word occurred in the comment. This list concluded a list of common abuse and spam words, as well as common function words.
-			\item  A word-2-vec score per comment is calculated by taking the average word2vec scores of every word in the sentence, normalised by the tf-idf score of each word.
+			\item For a list of swear words (since we are doing \emph{toxic} comment classification), we added a feature denoting whether that particular word occurred in the comment. This list included a list of common abuse and spam words, as well as common function words.
+			\item  A sentence2vec score comment is calculated by taking the average word2vec scores of every word in the sentence, normalised by the tf-idf score of each word.
 		\end{itemize}
-		
-		These features increased features from 10 to 80+ but only gave a marginal improvement to the mean-averaged area under the curve (AUC) score.
+		These features increased count from 10 to 80+ but only gave a marginal improvement to the mean-averaged area under the curve (AUC) score.
 		
 		\subsubsection{Feature-based Classifiers}
 		\label{sec:classifiers}
 		%	\subsubsection*{MultiLayer Perceptrons}
 		\textbf{Multilayer Perceptrons}
-		The multilater perceptron (MLP) is a basic neural network, using only fully connected (or dense) layers. In our case, the input consisted of the total number of features, and the output of the 6 classis as last layer, each denoting the probability that that one of the six respective was active for the current sample. 
-		
-		We experimented with various configurations of this setup. We varied the number of layers, and the width of the hidden layers.
-		
-		
+		The multilater perceptron (MLP) is a basic neural network, using only fully connected (or dense) layers. In our case, the input consisted of the total number of features, and the output of the six classes as the last layer, each denoting the probability for one of the six classes. For the MLP, we experimented with various configurations of this setup (i.e. the number of layers and the width of the hidden layers).
+		\\
 		%\subsubsection*{Support Vector Machines}
 		\textbf{Support Vector Machines}
 		We only used a linear kernel, but the learning time of the SVM was so high, that we quickly decided not to investigate this approach further.
-		
+		\\
 		%	\subsubsection*{Random Forests}
 		\textbf{Random Forests}
-		\hl{The random forest classifier also didn't get good results on the small feature set, we have not YET tested it on the big feature set.}
-		
+		{The random forest classifier also didn't get good results on the small feature set, and we decided to abandon this algorithm.}
+		\\
 		% \subsubsection*{1D Convolutional Network}
 		\textbf{1D Convolutional Network}
+		From literature we found convolutional networks to be a good choice for these type of tasks. since the convolutions in essence 
+		\\
+		\\
 		Another approach we tried is the 1-dimensional convolutional network. However, because this network showed weak results (merely 0.4902 ROC AUC score) we decided to drop this approach.
 		
 		\subsection{Neural Networks}
 		
 		After a small literature study we found a LSTM (Long Short Term Memory) to be the appropriate method in terms of a neural network approach. Because LSTM's are recurrent neural networks, it can learn temporal information, or the context of words in sentences. First we implemented a basic LSTM with a custom reverse dictionary. For this LSTM algorithm we first tried focusing on a top n percentage of common words as we thought that very common words might be influencing the model too much. However, after testing it on the training set, we noticed that the LSTM performed better when using all of the words. And as such, we abandoned this method.
-		
-		After that, we found a Kaggle kernel for a bidirectional LSTM. This means that we feed the sentence twice to the LSTM, once normally, from front to back, and once flipped. This mode performed better than aforementioned models, so we continued optimizing it.
+		\\
+		\\
+		After testing the regular LSTM network, we found literature about a bidirectional LSTM \cite{zhou2016text}. A bidirectional LSTM feeds the sentence twice tot he LSTM, once normally, from front to back, and once flipped. This model performed better than aforementioned models, so we continued optimizing it.
 		
 		% TODO plaatje van de Bidirect lstm
 		\begin{figure}
@@ -154,24 +159,20 @@
 			\end{verbatim}
 			\caption{An example of how the  Bidirectional layer would feed the data to the LSTM}
 		\end{figure}
-		
-		
-		
-		\section{Conclusion & Reflection}
-		Here we briefly discuss some things that stood out during this project.
-		
-		\textbf{Imbalanced dataset:} The one thing that stood out from our dataset is that it was very imbalanced. This made it hard to test if our model was performing correctly as predicting that every comment was non-toxic already resulted in an accuracy of $\approx 0.96$. This made it hard to train our models as during training time the model quickly returned a small loss.
-		
-		\textbf{Ensemble Methods} During the first competition, we found out that ensemble models are extremely powerful for machine learning tasks (e.g. during the project presentations some groups used these). We have decided that we also want to use ensemble methods in the next competition. For this competition however, we did not have the correct models to have an efficient ensemble.
-		
-		\textbf{Collaboration} After this first project we are more accustomed to each of our group members (i.e. knowing each other's strengths/weaknesses). This makes it easier for us to work together and enables us to divide our tasks accordingly. To efficiently work together, we're going to utilize an existing git strategy, such as git flow. Also, we found great benefit in the weekly meetings and thus we're going to continue doing so.
-		\begin{thebibliography}{xx}
-			\bibitem{abc}
-			\textsc{Jagan}, \textit{Stop the S@\#\$ - Toxic Comments EDA},
-			https://www.kaggle.com/jagangupta/stop-the-s-toxic-comments-eda
-		\end{thebibliography}
-		
-		
+		\newpage
+		\begin{minipage}{\linewidth}
+		\section{Reflection}
+		This section briefly discusses some things that stood out during this project.
+		\subsection{Imbalanced dataset}
+		The one thing that stood out from our dataset is that it was very imbalanced. This made it hard to test if our model was performing correctly as predicting that every comment was non-toxic already resulted in an accuracy of $\approx 0.96$. This made it hard to train our models as during training time the model quickly returned a small loss.
+    	\subsection{Ensemble methods}
+		During the first competition, we found out that ensemble models are extremely powerful for machine learning tasks (e.g. during the project presentations some groups used these). We have decided that we also want to use ensemble methods in the next competition. For this competition however, we did not have the correct models to have an efficient ensemble.
+		\subsection{Collaboration}
+		After this first project we are more accustomed to each of our group members (i.e. knowing each other's strengths/weaknesses). This makes it easier for us to work together and enables us to divide our tasks accordingly. To efficiently work together, we're going to utilize an existing git strategy, such as git flow. Also, we found great benefit in the weekly meetings and thus we're going to continue doing so.
+	    
+	\bibliographystyle{unsrt}
+	\bibliography{bib}
+	\end{minipage}
 	\end{multicols}
 	
 \end{document}
