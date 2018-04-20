@@ -29,10 +29,13 @@ There's a (big) chance that the tutorial is not explanatory enough. If you're in
 \end{itemize}
 
 \section{GCP setup}
-As a preparation the TA's have created several buckets\footnote{Basically a folder which can be assigned to specific users. This makes it possible to assign a bucket to each specific group. These folders/buckets are used as a mechanism to save your data files and resulting models.} on GCP. The TA's have assigned a bucket to each group.
+The TA's of this course have created an unique project for each group on GCP. After logging into GCP, you first have to select your project (top of the page).
 \\
 \\
-To work with GCP you'll need to install their SDK (using the following \textit{\href{https://cloud.google.com/sdk/docs/}{tutorial}}). This tutorial will prompt you to select a project for which you'll have to select 'Pilot project 1'.
+After you've selected your project you need to create a bucket\footnote{Basically a folder which we'll use to save data files and trained models.}. You can use the search bar at the top of the screen to go to the storage page (this is where you can create a new bucket). After creating a new bucket, make sure to note the region you choose as you'll need this later.
+\\
+\\
+Lastly, to work with GCP from your computer, you'll need to install their SDK (using the following \textit{\href{https://cloud.google.com/sdk/docs/}{tutorial}}). This tutorial will prompt you to select a project for which you'll have to select 'Pilot project 1'.
 
 \section{Upload training data}
 To train your model, you first have to send your training data to GCP. This can be done in a number of ways, most people will probably want to send a folder (with train, test and maybe validation data). This can be done using the following (terminal) command:
@@ -90,7 +93,7 @@ gcloud ml-engine local train --module-name trainer.train \
 
 
 \subsection{Cloud}
-To test your model in the cloud use the following command, where the job name needs to be unique and where the region should correspond to the region of your bucket (region can be found in your bucket list on GCP):
+To test your model in the cloud use the following command, where the job name needs to be unique and where the region should correspond to the region of your bucket:
 \begin{verbatim}
 gcloud ml-engine jobs submit training job_name --stream-logs \
 --runtime-version 1.4 --job-dir gs://bucket_name/job_name \
